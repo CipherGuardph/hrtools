@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HR Tools Demo</title>
+  <title>HR Tools Home</title>
   <style>
     :root {
       --ink: #17211b;
-      --muted: #657067;
-      --line: #dbe3dc;
+      --muted: #647168;
+      --line: #dce5df;
+      --bg: #f5f7f2;
       --panel: #ffffff;
-      --bg: #f6f8f4;
-      --mint: #bfe7d0;
-      --teal: #2e8074;
-      --amber: #f4bf61;
-      --coral: #ea766c;
-      --blue: #5f8fc8;
-      --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
+      --teal: #2f8074;
+      --lime: #bfe7d0;
+      --amber: #f2bf61;
+      --coral: #e9786d;
+      --blue: #5d8fc8;
+      --shadow: 0 22px 55px rgba(30, 44, 35, 0.14);
     }
 
     * {
@@ -25,812 +25,399 @@
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
-      background: var(--bg);
-      line-height: 1.5;
+      background:
+        linear-gradient(135deg, rgba(191, 231, 208, 0.42), transparent 38%),
+        linear-gradient(315deg, rgba(93, 143, 200, 0.18), transparent 34%),
+        var(--bg);
     }
 
-    button, input, select {
-      font: inherit;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    .app {
+    .shell {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-rows: auto 1fr;
     }
 
-    .sidebar {
-      background: #17211b;
-      color: #eef6ef;
-      padding: 28px 22px;
+    header {
       display: flex;
-      flex-direction: column;
-      gap: 26px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px clamp(18px, 5vw, 64px);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-weight: 800;
-      font-size: 1.35rem;
-      letter-spacing: 0;
+      font-weight: 900;
+      font-size: 1.15rem;
     }
 
-    .brand-mark {
+    .mark {
       width: 42px;
       height: 42px;
       border-radius: 8px;
       display: grid;
       place-items: center;
-      background: linear-gradient(135deg, var(--mint), var(--amber));
-      color: #102018;
-      font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--amber));
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(47, 128, 116, 0.25);
     }
 
-    .nav {
-      display: grid;
-      gap: 8px;
-    }
-
-    .nav button {
-      min-height: 44px;
-      border: 0;
-      border-radius: 8px;
-      padding: 0 12px;
-      color: #dce8df;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .nav button.active {
-      background: rgba(191, 231, 208, 0.16);
-      color: #ffffff;
-    }
-
-    .nav .icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      background: rgba(255, 255, 255, 0.08);
-      flex: 0 0 auto;
-    }
-
-    .sidebar-note {
-      margin-top: auto;
-      padding: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
-      color: #ccd8d0;
-      font-size: 0.92rem;
-    }
-
-    .main {
-      padding: 28px;
-      overflow: hidden;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      margin-bottom: 22px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.2rem, 4vw, 4.8rem);
-      line-height: 0.98;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      margin: 10px 0 0;
-      max-width: 760px;
-      color: var(--muted);
-      font-size: 1.03rem;
-    }
-
-    .actions {
+    nav {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
 
-    .btn {
+    .nav-link,
+    .button {
       min-height: 42px;
-      border: 1px solid var(--line);
       border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      font-weight: 800;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.78);
       padding: 0 14px;
-      background: #fff;
-      color: var(--ink);
-      cursor: pointer;
-      font-weight: 700;
       box-shadow: 0 2px 0 rgba(23, 33, 27, 0.04);
     }
 
-    .btn.primary {
+    .button {
+      min-height: 52px;
+      padding: 0 18px;
+    }
+
+    .button.primary {
       background: var(--teal);
       border-color: var(--teal);
       color: #fff;
     }
 
-    .hero-band {
-      min-height: 230px;
-      border-radius: 8px;
-      background:
-        linear-gradient(90deg, rgba(23, 33, 27, 0.92), rgba(23, 33, 27, 0.54)),
-        radial-gradient(circle at 85% 34%, rgba(244, 191, 97, 0.85) 0 11%, transparent 12%),
-        radial-gradient(circle at 78% 70%, rgba(191, 231, 208, 0.95) 0 18%, transparent 19%),
-        linear-gradient(135deg, #2e8074, #5f8fc8);
-      color: #fff;
-      padding: 28px;
+    .hero {
       display: grid;
-      align-content: end;
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      align-items: center;
+      gap: clamp(24px, 4vw, 52px);
+      padding: 26px clamp(18px, 5vw, 64px) 58px;
     }
 
-    .hero-band p {
-      margin: 10px 0 0;
-      max-width: 620px;
-      color: #e4eee8;
+    .copy {
+      max-width: 760px;
     }
 
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(150px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 7vw, 7.4rem);
+      line-height: 0.92;
+      letter-spacing: 0;
     }
 
-    .metric, .panel, .employee-card {
-      background: var(--panel);
+    .lead {
+      margin: 22px 0 0;
+      max-width: 660px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.6vw, 1.22rem);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .dashboard {
+      min-height: 560px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(31, 45, 35, 0.06);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
-    .metric {
-      padding: 16px;
-      min-height: 116px;
-    }
-
-    .metric span {
-      color: var(--muted);
-      font-size: 0.88rem;
-      font-weight: 700;
-    }
-
-    .metric strong {
-      display: block;
-      margin-top: 10px;
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .metric small {
-      color: var(--teal);
-      font-weight: 800;
-    }
-
-    .workspace {
-      display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(310px, 0.8fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .panel {
-      padding: 18px;
-      min-width: 0;
-    }
-
-    .panel-head {
+    .dashboard-top {
+      min-height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
+      padding: 18px;
+      background: #17211b;
+      color: #fff;
+    }
+
+    .status {
+      min-height: 32px;
+      border-radius: 999px;
+      padding: 0 12px;
+      background: rgba(191, 231, 208, 0.16);
+      display: inline-flex;
+      align-items: center;
+      font-weight: 800;
+      color: #ddf3e5;
+    }
+
+    .dashboard-body {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-bottom: 14px;
     }
 
-    h2 {
-      margin: 0;
-      font-size: 1.2rem;
-      letter-spacing: 0;
-    }
-
-    .filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filters input, .filters select {
-      min-height: 38px;
+    .stat {
+      min-height: 104px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 0 10px;
-      background: #fff;
-      color: var(--ink);
-      max-width: 220px;
+      padding: 14px;
+      background: #fbfcfa;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    th, td {
-      padding: 13px 10px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      vertical-align: middle;
-      word-break: break-word;
-    }
-
-    th {
+    .stat span {
+      display: block;
       color: var(--muted);
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0;
+      font-weight: 800;
+      font-size: 0.84rem;
     }
 
-    tr:last-child td {
-      border-bottom: 0;
+    .stat strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 1.85rem;
+      line-height: 1;
     }
 
-    .person {
-      display: flex;
+    .tool-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tool-row {
+      min-height: 82px;
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
       align-items: center;
-      gap: 10px;
-      min-width: 0;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
     }
 
-    .avatar {
-      width: 34px;
-      height: 34px;
+    .tool-icon {
+      width: 48px;
+      height: 48px;
       border-radius: 8px;
       display: grid;
       place-items: center;
-      color: #15231b;
-      background: var(--mint);
       font-weight: 900;
-      flex: 0 0 auto;
+      background: var(--lime);
     }
 
-    .pill {
+    .tool-row:nth-child(2) .tool-icon {
+      background: var(--amber);
+    }
+
+    .tool-row:nth-child(3) .tool-icon {
+      background: #dbe7fb;
+    }
+
+    .tool-row h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .tool-row p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .mini-btn {
+      min-height: 36px;
+      border-radius: 8px;
+      padding: 0 12px;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      min-height: 28px;
-      border-radius: 999px;
-      padding: 0 10px;
-      font-size: 0.82rem;
-      font-weight: 800;
+      background: #edf6ef;
+      color: #256554;
+      font-weight: 900;
       white-space: nowrap;
     }
 
-    .pill.active { background: #dff5e8; color: #246a52; }
-    .pill.review { background: #fff0d3; color: #95640f; }
-    .pill.leave { background: #ffe1de; color: #9a3d37; }
-
-    .right-stack {
-      display: grid;
-      gap: 18px;
-    }
-
-    .employee-card {
-      padding: 18px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .selected-person {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .big-avatar {
-      width: 62px;
-      height: 62px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      background: var(--amber);
-      color: #1f2418;
-      font-weight: 900;
-      font-size: 1.3rem;
-    }
-
-    .details {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .detail {
-      border-top: 1px solid var(--line);
-      padding-top: 10px;
-    }
-
-    .detail span {
-      color: var(--muted);
-      display: block;
-      font-size: 0.82rem;
-    }
-
-    .detail strong {
-      display: block;
-      margin-top: 3px;
-    }
-
-    .form-grid {
+    .insights {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .form-grid label {
-      display: grid;
-      gap: 6px;
-      color: var(--muted);
-      font-size: 0.86rem;
-      font-weight: 800;
-    }
-
-    .form-grid input, .form-grid select {
-      min-height: 38px;
-      border: 1px solid var(--line);
+    .insight {
       border-radius: 8px;
-      padding: 0 10px;
-      color: var(--ink);
-      background: #fff;
-    }
-
-    .form-grid .wide {
-      grid-column: 1 / -1;
-    }
-
-    .output {
-      margin-top: 12px;
-      min-height: 50px;
-      border-radius: 8px;
-      background: #eef6ef;
-      color: #225a49;
-      padding: 12px;
-      font-weight: 800;
-    }
-
-    .tasks {
-      display: grid;
-      gap: 10px;
-    }
-
-    .task {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-height: 40px;
-    }
-
-    .task input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--teal);
-    }
-
-    .chart {
-      height: 145px;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      align-items: end;
-      gap: 10px;
-      border-bottom: 1px solid var(--line);
-      padding-top: 12px;
-    }
-
-    .bar {
-      min-height: 22px;
-      border-radius: 8px 8px 0 0;
-      background: var(--blue);
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 6px;
+      padding: 16px;
       color: #fff;
-      font-size: 0.78rem;
-      font-weight: 900;
+      min-height: 126px;
+      display: grid;
+      align-content: end;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
     }
 
-    .bar:nth-child(2) { background: var(--teal); }
-    .bar:nth-child(3) { background: var(--amber); color: #32250f; }
-    .bar:nth-child(4) { background: var(--coral); }
-    .bar:nth-child(5) { background: #7da66f; }
+    .insight:last-child {
+      background: linear-gradient(135deg, var(--coral), var(--amber));
+      color: #251b10;
+    }
 
-    @media (max-width: 1050px) {
-      .app {
+    .insight strong {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .insight span {
+      margin-top: 7px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 960px) {
+      .hero {
         grid-template-columns: 1fr;
       }
 
-      .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 3;
-        padding: 14px;
-        flex-direction: row;
-        align-items: center;
-        overflow-x: auto;
-      }
-
-      .nav {
-        display: flex;
-        min-width: max-content;
-      }
-
-      .sidebar-note {
-        display: none;
-      }
-
-      .workspace {
-        grid-template-columns: 1fr;
+      .dashboard {
+        min-height: auto;
       }
     }
 
-    @media (max-width: 760px) {
-      .main {
-        padding: 18px;
-      }
-
-      .topbar, .panel-head {
+    @media (max-width: 620px) {
+      header {
         align-items: flex-start;
         flex-direction: column;
       }
 
-      .actions, .filters {
-        justify-content: stretch;
+      nav,
+      .actions {
         width: 100%;
       }
 
-      .btn, .filters input, .filters select {
+      .nav-link,
+      .button {
         width: 100%;
-        max-width: none;
       }
 
-      .metrics {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      table {
-        min-width: 650px;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .brand span:last-child {
-        display: none;
-      }
-
-      .metrics, .details, .form-grid {
+      .stat-grid,
+      .insights {
         grid-template-columns: 1fr;
       }
 
-      .form-grid .wide {
-        grid-column: auto;
+      .tool-row {
+        grid-template-columns: 48px 1fr;
+      }
+
+      .mini-btn {
+        grid-column: 1 / -1;
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar" aria-label="HR navigation">
-      <div class="brand">
-        <span class="brand-mark">HR</span>
+  <div class="shell">
+    <header>
+      <a class="brand" href="/">
+        <span class="mark">HR</span>
         <span>HR Tools</span>
-      </div>
-      <nav class="nav" aria-label="Demo sections">
-        <button class="active" type="button"><span class="icon">D</span>Dashboard</button>
-        <button type="button"><span class="icon">P</span>People</button>
-        <button type="button"><span class="icon">L</span>Leave</button>
-        <button type="button"><span class="icon">O</span>Onboarding</button>
+      </a>
+      <nav aria-label="Main navigation">
+        <a class="nav-link" href="/hr-demo.html">HR Demo Page</a>
+        <a class="nav-link" href="/word-to-pdf-convert/">PDF to Word converter</a>
       </nav>
-      <div class="sidebar-note">
-        Demo workspace for employee records, leave planning, onboarding, and payroll snapshots.
-      </div>
-    </aside>
+    </header>
 
-    <main class="main">
-      <section class="topbar">
-        <div>
-          <h1>HR Tools</h1>
-          <p class="subtitle">A practical HR operations demo with live employee filtering, leave estimates, onboarding progress, and monthly workforce metrics.</p>
-        </div>
+    <main class="hero">
+      <section class="copy" aria-label="Home introduction">
+        <h1>HR Tools</h1>
+        <p class="lead">A practical home base for HR operations, employee records, document conversion, onboarding, leave planning, and workforce admin demos.</p>
         <div class="actions">
-          <button class="btn" type="button" id="exportBtn">Export</button>
-          <button class="btn primary" type="button" id="newHireBtn">Add New Hire</button>
+          <a class="button primary" href="/hr-demo.html">HR Demo Page</a>
+          <a class="button" href="/word-to-pdf-convert/">PDF to Word converter</a>
         </div>
       </section>
 
-      <section class="hero-band" aria-label="HR tools demo overview">
-        <div>
-          <h2>People operations in one view</h2>
-          <p>Track employee status, approve leave, prepare onboarding, and preview payroll changes from a clean daily dashboard.</p>
+      <section class="dashboard" aria-label="Tools overview">
+        <div class="dashboard-top">
+          <strong>Operations workspace</strong>
+          <span class="status">Live demo</span>
         </div>
-      </section>
+        <div class="dashboard-body">
+          <div class="stat-grid">
+            <article class="stat">
+              <span>Employees</span>
+              <strong>48</strong>
+            </article>
+            <article class="stat">
+              <span>Open Requests</span>
+              <strong>6</strong>
+            </article>
+            <article class="stat">
+              <span>Docs Ready</span>
+              <strong>12</strong>
+            </article>
+          </div>
 
-      <section class="metrics" aria-label="HR metrics">
-        <article class="metric">
-          <span>Total Employees</span>
-          <strong id="employeeCount">48</strong>
-          <small>+4 this quarter</small>
-        </article>
-        <article class="metric">
-          <span>Open Leave Requests</span>
-          <strong>6</strong>
-          <small>2 need review</small>
-        </article>
-        <article class="metric">
-          <span>Onboarding Tasks</span>
-          <strong id="taskCount">7/9</strong>
-          <small>78% complete</small>
-        </article>
-        <article class="metric">
-          <span>Payroll Preview</span>
-          <strong>$186k</strong>
-          <small>May 2026</small>
-        </article>
-      </section>
-
-      <section class="workspace">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Employee Directory</h2>
-            <div class="filters">
-              <input id="searchInput" type="search" placeholder="Search employees" aria-label="Search employees">
-              <select id="departmentFilter" aria-label="Filter by department">
-                <option value="all">All departments</option>
-                <option>Engineering</option>
-                <option>Finance</option>
-                <option>People</option>
-                <option>Sales</option>
-              </select>
+          <div class="tool-list">
+            <a class="tool-row" href="/hr-demo.html">
+              <span class="tool-icon">HR</span>
+              <span>
+                <h2>HR Demo Page</h2>
+                <p>Open the employee directory, leave calculator, onboarding checklist, and payroll preview.</p>
+              </span>
+              <span class="mini-btn">Open</span>
+            </a>
+            <a class="tool-row" href="/word-to-pdf-convert/">
+              <span class="tool-icon">PDF</span>
+              <span>
+                <h2>PDF to Word converter</h2>
+                <p>Upload a PDF, extract document text, preview the Word layout, and download a Word-compatible file.</p>
+              </span>
+              <span class="mini-btn">Convert</span>
+            </a>
+            <div class="tool-row">
+              <span class="tool-icon">ON</span>
+              <span>
+                <h2>Onboarding queue</h2>
+                <p>Track hiring tasks, manager intros, equipment, contracts, and benefits setup.</p>
+              </span>
+              <span class="mini-btn">Ready</span>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                  <th>Start Date</th>
-                </tr>
-              </thead>
-              <tbody id="employeeRows"></tbody>
-            </table>
+
+          <div class="insights">
+            <article class="insight">
+              <strong>78%</strong>
+              <span>Onboarding completion</span>
+            </article>
+            <article class="insight">
+              <strong>3 min</strong>
+              <span>Document preparation time</span>
+            </article>
           </div>
         </div>
-
-        <aside class="right-stack">
-          <section class="employee-card" aria-label="Selected employee">
-            <div class="selected-person">
-              <div class="big-avatar" id="selectedInitials">AM</div>
-              <div>
-                <h2 id="selectedName">Ari Morgan</h2>
-                <span id="selectedRole">People Partner</span>
-              </div>
-            </div>
-            <div class="details">
-              <div class="detail">
-                <span>Department</span>
-                <strong id="selectedDept">People</strong>
-              </div>
-              <div class="detail">
-                <span>Manager</span>
-                <strong id="selectedManager">Nora Lee</strong>
-              </div>
-              <div class="detail">
-                <span>Leave Balance</span>
-                <strong id="selectedLeave">14 days</strong>
-              </div>
-              <div class="detail">
-                <span>Status</span>
-                <strong id="selectedStatus">Active</strong>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel" aria-label="Leave request demo">
-            <div class="panel-head">
-              <h2>Leave Request Demo</h2>
-            </div>
-            <form id="leaveForm" class="form-grid">
-              <label>
-                Employee
-                <select id="leaveEmployee"></select>
-              </label>
-              <label>
-                Type
-                <select id="leaveType">
-                  <option>Annual leave</option>
-                  <option>Sick leave</option>
-                  <option>Personal leave</option>
-                </select>
-              </label>
-              <label>
-                Start
-                <input id="startDate" type="date" value="2026-05-06">
-              </label>
-              <label>
-                End
-                <input id="endDate" type="date" value="2026-05-08">
-              </label>
-              <button class="btn primary wide" type="submit">Calculate Request</button>
-            </form>
-            <div class="output" id="leaveOutput">Choose dates to preview an approval note.</div>
-          </section>
-
-          <section class="panel" aria-label="Onboarding checklist">
-            <div class="panel-head">
-              <h2>Onboarding</h2>
-            </div>
-            <div class="tasks">
-              <label class="task"><input type="checkbox" checked> Contract signed</label>
-              <label class="task"><input type="checkbox" checked> Payroll profile created</label>
-              <label class="task"><input type="checkbox" checked> Equipment assigned</label>
-              <label class="task"><input type="checkbox"> Benefits walkthrough</label>
-              <label class="task"><input type="checkbox" checked> Manager intro booked</label>
-            </div>
-          </section>
-
-          <section class="panel" aria-label="Hiring pipeline chart">
-            <div class="panel-head">
-              <h2>Hiring Pipeline</h2>
-            </div>
-            <div class="chart">
-              <div class="bar" style="height: 92%">24</div>
-              <div class="bar" style="height: 70%">18</div>
-              <div class="bar" style="height: 44%">9</div>
-              <div class="bar" style="height: 30%">5</div>
-              <div class="bar" style="height: 54%">12</div>
-            </div>
-          </section>
-        </aside>
       </section>
     </main>
   </div>
-
-  <script>
-    const employees = [
-      { name: "Ari Morgan", role: "People Partner", department: "People", status: "Active", start: "2023-02-13", manager: "Nora Lee", leave: 14 },
-      { name: "Dev Patel", role: "Frontend Engineer", department: "Engineering", status: "Active", start: "2024-07-22", manager: "Mina Cho", leave: 9 },
-      { name: "Lina Brooks", role: "Payroll Analyst", department: "Finance", status: "Review", start: "2022-11-01", manager: "Owen Grant", leave: 18 },
-      { name: "Mateo Ruiz", role: "Account Executive", department: "Sales", status: "On Leave", start: "2021-05-17", manager: "Priya Shah", leave: 3 },
-      { name: "Nora Lee", role: "Director of People", department: "People", status: "Active", start: "2020-09-08", manager: "CEO Office", leave: 21 },
-      { name: "Tessa Kim", role: "Backend Engineer", department: "Engineering", status: "Active", start: "2025-01-15", manager: "Mina Cho", leave: 11 }
-    ];
-
-    const rows = document.querySelector("#employeeRows");
-    const searchInput = document.querySelector("#searchInput");
-    const departmentFilter = document.querySelector("#departmentFilter");
-    const leaveEmployee = document.querySelector("#leaveEmployee");
-    const leaveForm = document.querySelector("#leaveForm");
-    const leaveOutput = document.querySelector("#leaveOutput");
-
-    function initials(name) {
-      return name.split(" ").map(part => part[0]).join("");
-    }
-
-    function statusClass(status) {
-      if (status === "Review") return "review";
-      if (status === "On Leave") return "leave";
-      return "active";
-    }
-
-    function formatDate(value) {
-      return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
-    }
-
-    function selectEmployee(employee) {
-      document.querySelector("#selectedInitials").textContent = initials(employee.name);
-      document.querySelector("#selectedName").textContent = employee.name;
-      document.querySelector("#selectedRole").textContent = employee.role;
-      document.querySelector("#selectedDept").textContent = employee.department;
-      document.querySelector("#selectedManager").textContent = employee.manager;
-      document.querySelector("#selectedLeave").textContent = `${employee.leave} days`;
-      document.querySelector("#selectedStatus").textContent = employee.status;
-      leaveEmployee.value = employee.name;
-    }
-
-    function renderEmployees() {
-      const query = searchInput.value.trim().toLowerCase();
-      const dept = departmentFilter.value;
-      const filtered = employees.filter(employee => {
-        const matchesQuery = [employee.name, employee.role, employee.department].join(" ").toLowerCase().includes(query);
-        const matchesDept = dept === "all" || employee.department === dept;
-        return matchesQuery && matchesDept;
-      });
-
-      rows.innerHTML = filtered.map((employee, index) => `
-        <tr>
-          <td>
-            <button class="person btn" type="button" data-index="${employees.indexOf(employee)}" style="box-shadow:none;border:0;background:transparent;padding:0;min-height:auto;">
-              <span class="avatar">${initials(employee.name)}</span>
-              <strong>${employee.name}</strong>
-            </button>
-          </td>
-          <td>${employee.role}</td>
-          <td>${employee.department}</td>
-          <td><span class="pill ${statusClass(employee.status)}">${employee.status}</span></td>
-          <td>${formatDate(employee.start)}</td>
-        </tr>
-      `).join("");
-
-      if (!filtered.length) {
-        rows.innerHTML = `<tr><td colspan="5">No employees match this filter.</td></tr>`;
-      }
-    }
-
-    function populateLeaveEmployees() {
-      leaveEmployee.innerHTML = employees.map(employee => `<option>${employee.name}</option>`).join("");
-    }
-
-    rows.addEventListener("click", event => {
-      const button = event.target.closest("[data-index]");
-      if (button) selectEmployee(employees[Number(button.dataset.index)]);
-    });
-
-    searchInput.addEventListener("input", renderEmployees);
-    departmentFilter.addEventListener("change", renderEmployees);
-
-    leaveForm.addEventListener("submit", event => {
-      event.preventDefault();
-      const employee = employees.find(item => item.name === leaveEmployee.value);
-      const start = new Date(document.querySelector("#startDate").value);
-      const end = new Date(document.querySelector("#endDate").value);
-      const dayMs = 1000 * 60 * 60 * 24;
-      const days = Math.max(1, Math.round((end - start) / dayMs) + 1);
-      const type = document.querySelector("#leaveType").value;
-      const remaining = Math.max(0, employee.leave - days);
-      leaveOutput.textContent = `${employee.name}: ${days} day ${type.toLowerCase()} request. Estimated balance after approval: ${remaining} days.`;
-    });
-
-    document.querySelector("#exportBtn").addEventListener("click", () => {
-      alert("Demo export ready: employee directory, leave requests, and onboarding status.");
-    });
-
-    document.querySelector("#newHireBtn").addEventListener("click", () => {
-      alert("Demo new hire form: collect profile, role, manager, documents, and onboarding tasks.");
-    });
-
-    document.querySelectorAll(".task input").forEach(input => {
-      input.addEventListener("change", () => {
-        const total = document.querySelectorAll(".task input").length;
-        const done = document.querySelectorAll(".task input:checked").length;
-        document.querySelector("#taskCount").textContent = `${done}/${total}`;
-      });
-    });
-
-    populateLeaveEmployees();
-    renderEmployees();
-    selectEmployee(employees[0]);
-  </script>
 </body>
 </html>

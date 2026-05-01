@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF to Word Converter</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #657067;
+      --line: #dbe3dc;
+      --bg: #f6f8f4;
+      --panel: #ffffff;
+      --teal: #2e8074;
+      --mint: #bfe7d0;
+      --amber: #f3bf61;
+      --coral: #e9796f;
+      --blue: #5e8fc8;
+      --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    button, textarea, input, select { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px clamp(18px, 5vw, 58px);
+      background: #17211b;
+      color: #fff;
+    }
+
+    .brand, .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--mint), var(--amber));
+      color: #17211b;
+    }
+
+    .back {
+      min-height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #eef6ef;
+    }
+
+    .hero {
+      padding: 34px clamp(18px, 5vw, 58px) 20px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 5vw, 5.6rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 12px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .route-pill, .badge {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      padding: 0 clamp(18px, 5vw, 58px) 58px;
+      display: grid;
+      grid-template-columns: minmax(340px, 0.88fr) minmax(0, 1.12fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel, .preview {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel-head, .preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.17rem;
+      letter-spacing: 0;
+    }
+
+    .mode {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #eef3ef;
+    }
+
+    .mode button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .mode button.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 8px 22px rgba(23, 33, 27, 0.09);
+    }
+
+    .dropzone {
+      min-height: 154px;
+      border: 2px dashed #b7c7bb;
+      border-radius: 8px;
+      background: #fbfdfb;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .dropzone strong {
+      display: block;
+      font-size: 1.08rem;
+    }
+
+    .dropzone span span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .dropzone input { display: none; }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 340px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    .status-card {
+      min-height: 86px;
+      border-radius: 8px;
+      background: #edf7f0;
+      padding: 14px;
+      color: #245f4d;
+      display: grid;
+      gap: 10px;
+      font-weight: 800;
+    }
+
+    .progress {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(46, 128, 116, 0.18);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width 260ms ease;
+    }
+
+    .file-info {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .info {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfa;
+    }
+
+    .info span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .info strong {
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .preview { overflow: hidden; }
+
+    .preview-head {
+      min-height: 62px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfa;
+    }
+
+    .preview-shell {
+      padding: 24px;
+      background:
+        linear-gradient(90deg, rgba(219, 227, 220, 0.46) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(219, 227, 220, 0.46) 1px, transparent 1px),
+        #eef2ed;
+      background-size: 28px 28px;
+    }
+
+    .paper {
+      width: min(100%, 720px);
+      min-height: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 18px 40px rgba(23, 33, 27, 0.16);
+      padding: clamp(30px, 6vw, 64px);
+    }
+
+    .paper h3 {
+      margin: 0 0 18px;
+      font-size: 1.7rem;
+    }
+
+    .paper-meta {
+      color: var(--muted);
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .paper-body {
+      white-space: pre-wrap;
+      line-height: 1.7;
+      color: #26322a;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace { grid-template-columns: 1fr; }
+      .paper { min-height: 720px; }
+    }
+
+    @media (max-width: 620px) {
+      header, .panel-head, .preview-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .back, .btn { width: 100%; justify-content: center; }
+      .options, .file-info, .mode { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">
+      <span class="mark">PDF</span>
+      <span>HR Tools Converter</span>
+    </a>
+    <a class="back" href="/">Back Home</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1 id="pageTitle">PDF to Word Converter</h1>
+      <p class="lead" id="pageLead">Upload a PDF, extract readable document text, preview the Word layout, then download a Word-compatible document.</p>
+    </div>
+    <span class="route-pill">/word-to-pdf-convert</span>
+  </section>
+
+  <main class="workspace">
+    <section class="panel" aria-label="Conversion controls">
+      <div class="panel-head">
+        <h2 id="inputTitle">PDF Input</h2>
+        <button class="btn" type="button" id="sampleBtn">Use Sample</button>
+      </div>
+
+      <div class="mode" aria-label="Converter mode">
+        <button class="active" type="button" id="pdfToWordBtn">PDF to Word</button>
+        <button type="button" id="wordToPdfBtn">Reverse: Word to PDF</button>
+      </div>
+
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" accept=".pdf,.txt,.md,.html,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/html">
+        <span>
+          <strong id="dropTitle">Drop a PDF file here</strong>
+          <span id="dropHint">or click to choose a PDF file</span>
+        </span>
+      </label>
+
+      <div class="file-info" aria-label="File details">
+        <div class="info">
+          <span>File</span>
+          <strong id="fileName">No file selected</strong>
+        </div>
+        <div class="info">
+          <span>Size</span>
+          <strong id="fileSize">0 KB</strong>
+        </div>
+        <div class="info">
+          <span>Status</span>
+          <strong id="fileStatus">Ready</strong>
+        </div>
+      </div>
+
+      <label class="field">
+        Document title
+        <input id="docTitle" type="text" value="Converted HR Document">
+      </label>
+
+      <label class="field">
+        <span id="contentLabel">Extracted PDF text</span>
+        <textarea id="docText">Upload a PDF to extract text, or use the sample to preview a PDF to Word conversion.</textarea>
+      </label>
+
+      <div class="options">
+        <label class="field">
+          Word format
+          <select id="wordFormat">
+            <option value="doc">Microsoft Word .doc</option>
+            <option value="html">Word-compatible HTML</option>
+          </select>
+        </label>
+        <label class="field">
+          Export style
+          <select id="exportStyle">
+            <option value="standard">Standard HR document</option>
+            <option value="memo">Memo</option>
+            <option value="report">Report</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button class="btn primary" id="convertBtn" type="button">Convert to Word</button>
+        <button class="btn" id="downloadBtn" type="button" disabled>Download Word</button>
+        <button class="btn" id="printBtn" type="button">Print Preview</button>
+      </div>
+
+      <div class="status-card" aria-live="polite">
+        <span id="statusText">Ready to convert your PDF into a Word document.</span>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="preview" aria-label="Document preview">
+      <div class="preview-head">
+        <h2 id="previewHeading">Word Preview</h2>
+        <span id="previewBadge" class="badge">Draft</span>
+      </div>
+      <div class="preview-shell">
+        <article class="paper" id="paper">
+          <h3 id="previewTitle">Converted HR Document</h3>
+          <div class="paper-meta">
+            <span id="previewDate">Generated today</span>
+            <span id="previewStyle">Standard HR document</span>
+          </div>
+          <div class="paper-body" id="previewText"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.querySelector("#fileInput");
+    const dropzone = document.querySelector("#dropzone");
+    const fileName = document.querySelector("#fileName");
+    const fileSize = document.querySelector("#fileSize");
+    const fileStatus = document.querySelector("#fileStatus");
+    const docTitle = document.querySelector("#docTitle");
+    const docText = document.querySelector("#docText");
+    const wordFormat = document.querySelector("#wordFormat");
+    const exportStyle = document.querySelector("#exportStyle");
+    const previewTitle = document.querySelector("#previewTitle");
+    const previewText = document.querySelector("#previewText");
+    const previewDate = document.querySelector("#previewDate");
+    const previewStyle = document.querySelector("#previewStyle");
+    const previewBadge = document.querySelector("#previewBadge");
+    const statusText = document.querySelector("#statusText");
+    const progressBar = document.querySelector("#progressBar");
+    const downloadBtn = document.querySelector("#downloadBtn");
+    const convertBtn = document.querySelector("#convertBtn");
+    const pdfToWordBtn = document.querySelector("#pdfToWordBtn");
+    const wordToPdfBtn = document.querySelector("#wordToPdfBtn");
+    let mode = "pdfToWord";
+    let outputBlob = null;
+    let outputExtension = "doc";
+    let outputMime = "application/msword";
+
+    function formatBytes(bytes) {
+      if (!bytes) return "0 KB";
+      if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function sanitizeName(value) {
+      return (value.trim() || "converted-document").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "converted-document";
+    }
+
+    function decodePdfLiteral(value) {
+      return value
+        .replace(/\\n/g, "\n")
+        .replace(/\\r/g, "\n")
+        .replace(/\\t/g, " ")
+        .replace(/\\\(/g, "(")
+        .replace(/\\\)/g, ")")
+        .replace(/\\\\/g, "\\");
+    }
+
+    function extractPdfText(raw) {
+      const chunks = [];
+      const literalMatches = raw.matchAll(/\((?:\\.|[^\\)])*\)\s*Tj/g);
+      for (const match of literalMatches) {
+        chunks.push(decodePdfLiteral(match[0].replace(/\)\s*Tj$/, "").slice(1)));
+      }
+      const arrayMatches = raw.matchAll(/\[((?:\s*\((?:\\.|[^\\)])*\)\s*-?\d*)+)\]\s*TJ/g);
+      for (const match of arrayMatches) {
+        const parts = [...match[1].matchAll(/\((?:\\.|[^\\)])*\)/g)].map(part => decodePdfLiteral(part[0].slice(1, -1)));
+        if (parts.join("").trim()) chunks.push(parts.join(""));
+      }
+      const hexMatches = raw.matchAll(/<([0-9A-Fa-f\s]{4,})>\s*Tj/g);
+      for (const match of hexMatches) {
+        const hex = match[1].replace(/\s+/g, "");
+        let value = "";
+        for (let index = 0; index < hex.length; index += 2) {
+          const code = parseInt(hex.slice(index, index + 2), 16);
+          if (code >= 32 && code <= 126) value += String.fromCharCode(code);
+        }
+        if (value.trim()) chunks.push(value);
+      }
+      const text = chunks.join("\n").replace(/[^\S\r\n]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+      return text || `PDF text extraction needs review.
+
+This file was loaded successfully, but the browser demo could not extract embedded text from it. Some PDFs store text as scanned images or encoded font streams.
+
+Paste the visible PDF text here, then click Convert to Word to generate a Word-compatible document.`;
+    }
+
+    function htmlEscape(value) {
+      return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function createWordBlob(title, body) {
+      const content = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${htmlEscape(title)}</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; color: #1f2b23; line-height: 1.55; margin: 48px; }
+    h1 { font-size: 24pt; margin: 0 0 18px; }
+    .meta { color: #647168; border-bottom: 1px solid #dbe3dc; padding-bottom: 12px; margin-bottom: 20px; }
+    .body { white-space: pre-wrap; font-size: 11pt; }
+  </style>
+</head>
+<body>
+  <h1>${htmlEscape(title)}</h1>
+  <div class="meta">Converted by HR Tools PDF to Word Converter</div>
+  <div class="body">${htmlEscape(body)}</div>
+</body>
+</html>`;
+      outputExtension = wordFormat.value === "html" ? "html" : "doc";
+      outputMime = wordFormat.value === "html" ? "text/html" : "application/msword";
+      return new Blob([content], { type: outputMime });
+    }
+
+    function escapePdf(value) {
+      return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+    }
+
+    function wrapLines(value, maxLength) {
+      const lines = [];
+      value.split(/\r?\n/).forEach(paragraph => {
+        if (!paragraph.trim()) {
+          lines.push("");
+          return;
+        }
+        const words = paragraph.split(/\s+/);
+        let line = "";
+        words.forEach(word => {
+          const test = line ? `${line} ${word}` : word;
+          if (test.length > maxLength) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        });
+        if (line) lines.push(line);
+      });
+      return lines;
+    }
+
+    function createPdfBlob(title, body) {
+      const width = 612;
+      const height = 792;
+      const allLines = wrapLines(body, 82);
+      const firstPageLines = 38;
+      const nextPageLines = 45;
+      const pages = [];
+      pages.push(allLines.slice(0, firstPageLines));
+      for (let index = firstPageLines; index < allLines.length; index += nextPageLines) {
+        pages.push(allLines.slice(index, index + nextPageLines));
+      }
+      if (!pages.length) pages.push([""]);
+
+      const pageObjects = [];
+      const contentObjects = [];
+      pages.forEach((lines, pageIndex) => {
+        const commands = [
+          "BT",
+          "/F1 20 Tf",
+          `54 ${height - 70} Td`,
+          `(${escapePdf(pageIndex === 0 ? title || "Converted Document" : `${title || "Converted Document"} continued`)}) Tj`,
+          "0 -30 Td",
+          "/F1 10 Tf",
+          "(Generated by HR Tools Reverse Word to PDF Converter) Tj",
+          "0 -30 Td",
+          "/F1 11 Tf"
+        ];
+        lines.forEach(line => {
+          commands.push(`(${escapePdf(line)}) Tj`);
+          commands.push("0 -16 Td");
+        });
+        commands.push("ET");
+        const stream = commands.join("\n");
+        const pageObjectNumber = 3 + pageIndex;
+        const contentObjectNumber = 3 + pages.length + pageIndex;
+        pageObjects.push(`${pageObjectNumber} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 ${3 + pages.length * 2} 0 R >> >> /Contents ${contentObjectNumber} 0 R >>\nendobj\n`);
+        contentObjects.push(`${contentObjectNumber} 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`);
+      });
+      const fontObjectNumber = 3 + pages.length * 2;
+      const objects = [
+        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        `2 0 obj\n<< /Type /Pages /Kids [${pages.map((_, index) => `${3 + index} 0 R`).join(" ")}] /Count ${pages.length} >>\nendobj\n`,
+        ...pageObjects,
+        ...contentObjects,
+        `${fontObjectNumber} 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`
+      ];
+      let pdf = "%PDF-1.4\n";
+      const offsets = [0];
+      objects.forEach(object => {
+        offsets.push(pdf.length);
+        pdf += object;
+      });
+      const xref = pdf.length;
+      pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+      offsets.slice(1).forEach(offset => {
+        pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+      });
+      pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+      outputExtension = "pdf";
+      outputMime = "application/pdf";
+      return new Blob([pdf], { type: outputMime });
+    }
+
+    function updatePreview() {
+      previewTitle.textContent = docTitle.value.trim() || "Converted Document";
+      previewText.textContent = docText.value.trim() || "Add document content to preview the output.";
+      previewDate.textContent = new Intl.DateTimeFormat("en", { month: "long", day: "numeric", year: "numeric" }).format(new Date());
+      previewStyle.textContent = exportStyle.options[exportStyle.selectedIndex].text;
+      outputBlob = null;
+      downloadBtn.disabled = true;
+      previewBadge.textContent = "Draft";
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const isPdfToWord = mode === "pdfToWord";
+      pdfToWordBtn.classList.toggle("active", isPdfToWord);
+      wordToPdfBtn.classList.toggle("active", !isPdfToWord);
+      document.querySelector("#pageTitle").textContent = isPdfToWord ? "PDF to Word Converter" : "Word to PDF Converter";
+      document.querySelector("#pageLead").textContent = isPdfToWord
+        ? "Upload a PDF, extract readable document text, preview the Word layout, then download a Word-compatible document."
+        : "Reverse convert Word-style content into a generated PDF with a clean document preview.";
+      document.querySelector("#inputTitle").textContent = isPdfToWord ? "PDF Input" : "Word Input";
+      document.querySelector("#dropTitle").textContent = isPdfToWord ? "Drop a PDF file here" : "Drop a Word file here";
+      document.querySelector("#dropHint").textContent = isPdfToWord ? "or click to choose a PDF file" : "or click to choose .doc, .docx, .txt, .md, or .html";
+      document.querySelector("#contentLabel").textContent = isPdfToWord ? "Extracted PDF text" : "Word document content";
+      document.querySelector("#previewHeading").textContent = isPdfToWord ? "Word Preview" : "PDF Preview";
+      convertBtn.textContent = isPdfToWord ? "Convert to Word" : "Convert to PDF";
+      downloadBtn.textContent = isPdfToWord ? "Download Word" : "Download PDF";
+      statusText.textContent = isPdfToWord ? "Ready to convert your PDF into a Word document." : "Ready to reverse convert Word content into a PDF.";
+      fileStatus.textContent = "Ready";
+      fileInput.value = "";
+      fileName.textContent = "No file selected";
+      fileSize.textContent = "0 KB";
+      if (isPdfToWord) {
+        docTitle.value = "Converted HR Document";
+        docText.value = "Upload a PDF to extract text, or use the sample to preview a PDF to Word conversion.";
+      } else {
+        docTitle.value = "Employee Policy Update";
+        docText.value = `Employee Policy Update
+
+This document confirms the latest HR policy changes for employee onboarding, leave request handling, payroll preparation, and document storage.
+
+Prepared by HR Tools.`;
+      }
+      progressBar.style.width = "0%";
+      updatePreview();
+    }
+
+    function readFile(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = formatBytes(file.size);
+      const extension = file.name.split(".").pop().toLowerCase();
+      docTitle.value = file.name.replace(/\.[^.]+$/, "");
+      if (mode === "pdfToWord") {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const raw = String(reader.result || "");
+          docText.value = extractPdfText(raw);
+          fileStatus.textContent = "PDF text extracted";
+          statusText.textContent = "PDF loaded. Review the extracted text, then convert to Word.";
+          updatePreview();
+        };
+        reader.readAsText(file);
+        return;
+      }
+      if (["txt", "md", "html"].includes(extension)) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const raw = String(reader.result || "");
+          docText.value = extension === "html" ? raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : raw;
+          fileStatus.textContent = "Text extracted";
+          statusText.textContent = "Word content loaded. Review the preview, then convert to PDF.";
+          updatePreview();
+        };
+        reader.readAsText(file);
+      } else {
+        fileStatus.textContent = "Word file staged";
+        docText.value = `${file.name}
+
+This Word document has been staged for PDF export.
+
+For this browser-only demo, paste the visible Word content here when you need the generated PDF to contain exact document text.`;
+        statusText.textContent = "Word file staged. Paste or adjust content for exact PDF text, then convert.";
+        updatePreview();
+      }
+    }
+
+    function useSample() {
+      if (mode === "pdfToWord") {
+        docTitle.value = "Benefits Enrollment Guide";
+        docText.value = `Benefits Enrollment Guide
+
+This PDF has been converted into editable Word-style content.
+
+Employee action items:
+- Review available medical, dental, and vision plans.
+- Confirm dependent information before submitting enrollment.
+- Submit final benefit selections before the payroll cutoff.
+
+Prepared by HR Tools.`;
+        fileName.textContent = "benefits-enrollment-guide.pdf";
+        fileSize.textContent = "86 KB";
+        fileStatus.textContent = "Sample extracted";
+        statusText.textContent = "Sample PDF text extracted. Convert it to a Word document when ready.";
+      } else {
+        docTitle.value = "New Hire Checklist";
+        docText.value = `New Hire Checklist
+
+Candidate: Jamie Santos
+Role: HR Operations Specialist
+Start date: May 20, 2026
+
+Checklist:
+- Send employment agreement
+- Create payroll profile
+- Prepare equipment request
+- Schedule manager introduction
+- Book benefits orientation`;
+        fileName.textContent = "new-hire-checklist.docx";
+        fileSize.textContent = "48 KB";
+        fileStatus.textContent = "Sample loaded";
+        statusText.textContent = "Sample Word document loaded. Reverse convert it when ready.";
+      }
+      updatePreview();
+    }
+
+    function runConversion() {
+      convertBtn.disabled = true;
+      downloadBtn.disabled = true;
+      previewBadge.textContent = "Converting";
+      const steps = mode === "pdfToWord"
+        ? [["Reading PDF structure", 24], ["Extracting text blocks", 52], ["Building Word layout", 78], ["Packaging Word document", 100]]
+        : [["Reading Word content", 24], ["Applying PDF layout", 52], ["Rendering PDF page", 78], ["Packaging PDF file", 100]];
+      let index = 0;
+      progressBar.style.width = "0%";
+      const run = () => {
+        const [label, progress] = steps[index];
+        statusText.textContent = label;
+        progressBar.style.width = `${progress}%`;
+        index += 1;
+        if (index < steps.length) {
+          setTimeout(run, 330);
+          return;
+        }
+        outputBlob = mode === "pdfToWord"
+          ? createWordBlob(docTitle.value.trim(), docText.value.trim())
+          : createPdfBlob(docTitle.value.trim(), docText.value.trim());
+        statusText.textContent = mode === "pdfToWord" ? "Conversion complete. Your Word document is ready." : "Reverse conversion complete. Your PDF is ready.";
+        previewBadge.textContent = mode === "pdfToWord" ? "Word ready" : "PDF ready";
+        downloadBtn.disabled = false;
+        convertBtn.disabled = false;
+      };
+      setTimeout(run, 180);
+    }
+
+    fileInput.addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (file) readFile(file);
+    });
+
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.style.borderColor = "#2e8074";
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.style.borderColor = "#b7c7bb";
+    });
+
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.style.borderColor = "#b7c7bb";
+      const file = event.dataTransfer.files[0];
+      if (file) readFile(file);
+    });
+
+    document.querySelector("#sampleBtn").addEventListener("click", useSample);
+    pdfToWordBtn.addEventListener("click", () => setMode("pdfToWord"));
+    wordToPdfBtn.addEventListener("click", () => setMode("wordToPdf"));
+    convertBtn.addEventListener("click", runConversion);
+    [docTitle, docText, wordFormat, exportStyle].forEach(control => {
+      control.addEventListener("input", updatePreview);
+      control.addEventListener("change", updatePreview);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!outputBlob) return;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(outputBlob);
+      link.download = `${sanitizeName(docTitle.value)}.${outputExtension}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    document.querySelector("#printBtn").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>
