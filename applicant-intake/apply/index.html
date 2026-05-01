@@ -319,6 +319,8 @@
       job: demoStore.jobs.find(item => item.slug === jobSlug) || demoStore.jobs[0],
       file: null,
       extracted: null,
+      firebaseInitPromise: null,
+      liveConfigured: false,
     };
 
     const el = id => document.getElementById(id);
@@ -505,6 +507,19 @@
       if (!state.extracted) {
         await extractCurrentResume();
       }
+      if (state.firebaseInitPromise) {
+        setStatus("Waiting for the live backend connection...");
+        try {
+          await state.firebaseInitPromise;
+        } catch (error) {
+          setStatus(`Firebase connect failed: ${error.message}`);
+          return;
+        }
+      }
+      if (state.liveConfigured && !(state.mode === "firebase" && state.services)) {
+        setStatus("Live backend is not ready. Please wait for Firebase to connect.");
+        return;
+      }
       const extracted = state.extracted || {};
       const analysis = analyzeAgainstJob(extracted);
       const payload = {
@@ -570,12 +585,16 @@
     async function connectIfConfigured() {
       const cfg = IntakeShared.getFirebaseConfig();
       if (!cfg || !cfg.apiKey || !cfg.projectId || !cfg.appId) return;
+      state.liveConfigured = true;
+      state.firebaseInitPromise = IntakeShared.connectFirebase(cfg);
       try {
-        state.services = await IntakeShared.connectFirebase(cfg);
+        state.services = await state.firebaseInitPromise;
         state.mode = "firebase";
         setStatus("Live upload is connected. Resume files and applicant records will save to the shared system.");
       } catch (error) {
         setStatus(`Firebase connect failed: ${error.message}`);
+      } finally {
+        state.firebaseInitPromise = null;
       }
     }
 

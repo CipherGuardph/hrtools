@@ -146,7 +146,11 @@
   }
 
   function getPublicBaseUrl() {
-    return window.__APPLICANT_INTAKE_BASE_URL__ || "https://www.hr.cipherguardph.com/applicant-intake";
+    const configured = window.__APPLICANT_INTAKE_BASE_URL__;
+    if (configured) {
+      return String(configured).replace(/\/$/, "");
+    }
+    return new URL("/applicant-intake/", window.location.origin).toString().replace(/\/$/, "");
   }
 
   function saveDemoDb(db) {

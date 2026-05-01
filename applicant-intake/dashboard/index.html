@@ -415,7 +415,7 @@
         <div class="details">
           <div class="detail-card">
             <span>Public applicant link</span>
-            <strong id="qrLink">https://www.hr.cipherguardph.com/applicant-intake/apply/?job=cashier</strong>
+            <strong id="qrLink">Loading applicant link...</strong>
           </div>
           <div class="notice">Applicants scan this code to open the public upload page and submit a resume without logging in.</div>
           <div class="button-row">
@@ -510,7 +510,13 @@
       unsubJobs: null,
     };
 
-    const applicantUrl = `${IntakeShared.getPublicBaseUrl()}/apply/?job=cashier`;
+    function activeJobSlug() {
+      return state.jobs[0]?.slug || state.candidates[0]?.jobSlug || "cashier";
+    }
+
+    function applicantUrlFor(slug) {
+      return `${IntakeShared.getPublicBaseUrl()}/apply/?job=${encodeURIComponent(slug || "cashier")}`;
+    }
 
     function setStatus(message) {
       el("statusBox").textContent = message;
@@ -585,6 +591,7 @@
       renderRows();
       renderDetails();
       el("sourceBadge").textContent = state.mode === "firebase" ? "Live backend" : "Local preview";
+      const applicantUrl = applicantUrlFor(activeJobSlug());
       el("qrLink").textContent = applicantUrl;
       IntakeShared.renderQr(el("qrBox"), applicantUrl);
     }
@@ -756,6 +763,7 @@
       const win = window.open("", "_blank", "width=900,height=1100");
       if (!win) return setStatus("Allow pop-ups to print the QR.", "error");
       const dataUrl = canvas ? canvas.toDataURL("image/png") : img.src;
+      const applicantUrl = applicantUrlFor(activeJobSlug());
       win.document.write(`<!doctype html><html><head><title>Print QR</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#17211b}img{width:320px;height:320px;border:16px solid #fff;box-shadow:0 10px 26px rgba(0,0,0,.15)}.wrap{display:grid;gap:16px;justify-items:start}</style></head><body><div class="wrap"><h1>Instant Applicant Analyzer</h1><img src="${dataUrl}" alt="Applicant QR"><div>${applicantUrl}</div></div></body></html>`);
       win.document.close();
       win.onload = () => setTimeout(() => win.print(), 250);
