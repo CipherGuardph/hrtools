@@ -471,7 +471,7 @@
         <label>Status
           <select id="statusSelect">
             <option>queued</option>
-            <option>reviewing</option>
+            <option>reviewed</option>
             <option>shortlisted</option>
             <option>interview</option>
             <option>hired</option>
@@ -487,7 +487,8 @@
       </div>
       <div class="button-row">
         <button class="btn primary" id="saveNoteBtn" type="button">Save Review</button>
-        <button class="btn" id="interviewBtn" type="button">Mark Interview</button>
+        <button class="btn" id="reviewedBtn" type="button">Mark Reviewed</button>
+        <button class="btn primary" id="hiredBtn" type="button">Mark Hired</button>
         <button class="btn danger" id="deleteBtn" type="button">Delete Applicant</button>
       </div>
       <div class="notice" id="statusBox">Select a candidate to review their extracted information.</div>
@@ -622,6 +623,22 @@
       renderAll();
     }
 
+    function setCandidateStatus(status, note) {
+      const candidate = currentCandidate();
+      if (!candidate) {
+        setStatus("Select a candidate first.");
+        return;
+      }
+      const comment = note
+        ? (candidate.comments ? `${candidate.comments}\n` : "") + note
+        : candidate.comments;
+      updateCandidate({
+        status,
+        comments: comment,
+      });
+      setStatus(`Marked ${candidate.fullName || "applicant"} as ${status}.`);
+    }
+
     async function deleteCurrentCandidate() {
       const candidate = currentCandidate();
       if (!candidate) {
@@ -709,10 +726,12 @@
       });
     });
 
-    el("interviewBtn").addEventListener("click", () => {
-      const candidate = currentCandidate();
-      if (!candidate) return;
-      updateCandidate({ status: "interview", comments: (candidate.comments ? `${candidate.comments}\n` : "") + "Interview marked from dashboard." });
+    el("reviewedBtn").addEventListener("click", () => {
+      setCandidateStatus("reviewed", "Reviewed from dashboard.");
+    });
+
+    el("hiredBtn").addEventListener("click", () => {
+      setCandidateStatus("hired", "Marked hired from dashboard.");
     });
 
     el("deleteBtn").addEventListener("click", deleteCurrentCandidate);
