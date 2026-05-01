@@ -82,6 +82,12 @@
       gap: 14px;
     }
 
+    .panel:nth-of-type(1) { background: linear-gradient(180deg, #ffffff, #f8fcf9); }
+    .panel:nth-of-type(2) { background: linear-gradient(180deg, #ffffff, #eef7ff); }
+    .panel:nth-of-type(3) { background: linear-gradient(180deg, #ffffff, #fff8e9); }
+    .panel:nth-of-type(4) { background: linear-gradient(180deg, #ffffff, #f7fbf8); }
+    .panel:nth-of-type(5) { background: linear-gradient(180deg, #ffffff, #fff4ef); }
+
     h1 {
       margin: 0;
       font-size: clamp(2rem, 6vw, 3.8rem);
@@ -200,6 +206,10 @@
       background: #fbfcfa;
     }
 
+    .field-card:nth-child(2n) {
+      background: #ffffff;
+    }
+
     .field-card span {
       display: block;
       color: var(--muted);
@@ -245,18 +255,18 @@
     <section class="panel">
       <span class="badge" id="jobBadge">Job loading...</span>
       <h1 id="jobTitle">Apply</h1>
-      <p class="lead" id="jobDescription">We’re loading the job post linked to this QR code.</p>
+      <p class="lead" id="jobDescription">We are loading the job post linked to this QR code.</p>
       <div class="job-card" id="jobMeta">Required skills and experience will appear here.</div>
     </section>
 
     <section class="panel">
       <div class="badge">Applicant details</div>
       <div class="form-grid">
-        <label>Full name<input id="fullName" type="text" value="Mika Reyes"></label>
-        <label>Email<input id="email" type="email" value="mika.reyes@example.com"></label>
-        <label>Phone<input id="phone" type="text" value="+63 917 222 0198"></label>
+        <label>Full name<input id="fullName" type="text" placeholder="Enter your full name"></label>
+        <label>Email<input id="email" type="email" placeholder="Enter your email"></label>
+        <label>Phone<input id="phone" type="text" placeholder="Enter your mobile number"></label>
         <label>LinkedIn / Portfolio<input id="portfolio" type="text" placeholder="Optional"></label>
-        <label class="wide">Short intro<textarea id="intro">I build clean UI systems and support internal tools with React and TypeScript.</textarea></label>
+        <label class="wide">Short intro<textarea id="intro" placeholder="Tell us about your work experience, availability, or strengths"></textarea></label>
       </div>
     </section>
 
@@ -270,9 +280,8 @@
       </label>
       <div class="button-row">
         <button class="btn primary" id="submitBtn" type="button">Submit Application</button>
-        <button class="btn" id="loadDemoBtn" type="button">Load Demo Applicant</button>
       </div>
-      <div class="notice" id="statusBox">Your application will save to Firebase when connected, or to local demo storage otherwise.</div>
+      <div class="notice" id="statusBox">Your resume is extracted automatically and submitted securely after upload.</div>
     </section>
 
     <section class="panel">
@@ -346,7 +355,7 @@
       el("jobTitle").textContent = job.title;
       el("jobDescription").textContent = job.description;
       el("jobMeta").textContent = `Skills: ${job.requiredSkills || "-"} · Experience: ${job.experienceNeeded || "-"} · QR: ${job.qrUrl || "-"}`;
-      el("savedJobLink").textContent = `${IntakeShared.getPublicBaseUrl()}/?job=${job.slug}`;
+      el("savedJobLink").textContent = `${IntakeShared.getPublicBaseUrl()}/apply/?job=${job.slug}`;
     }
 
     function setStatus(text) {
@@ -369,26 +378,6 @@
       el("resumeName").textContent = file ? `${file.name} (${IntakeShared.formatBytes(file.size)})` : "No file selected";
       el("savedResume").textContent = file ? file.name : "Waiting for upload";
       updateExtractionCards();
-    }
-
-    function loadDemoApplicant() {
-      el("fullName").value = "Mika Reyes";
-      el("email").value = "mika.reyes@example.com";
-      el("phone").value = "+63 917 222 0198";
-      el("portfolio").value = "https://example.com/mika";
-      el("intro").value = "I have retail checkout experience and enjoy helping customers at the register.";
-      state.extracted = {
-        fullName: "Mika Reyes",
-        email: "mika.reyes@example.com",
-        phone: "+63 917 222 0198",
-        skills: "Cash handling, POS system, customer service",
-        method: "demo profile",
-        status: "Preview ready",
-        summary: "Retail cashier profile with customer service and checkout experience.",
-      };
-      setFile(null);
-      setStatus("Demo applicant loaded. Upload a resume to run extraction.");
-      updateExtractionCards(state.extracted);
     }
 
     async function extractPdf(file) {
@@ -453,6 +442,25 @@
       };
     }
 
+    function analyzeAgainstJob(extracted) {
+      const job = state.job || {};
+      const required = String(job.requiredSkills || "")
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean);
+      const haystack = `${extracted.skills || ""} ${extracted.rawText || ""} ${el("intro").value.trim()}`.toLowerCase();
+      const matched = required.filter(skill => haystack.includes(skill.toLowerCase()));
+      const coverage = required.length ? matched.length / required.length : 0.65;
+      const score = Math.max(48, Math.min(98, Math.round(coverage * 78 + (matched.length ? 16 : 10))));
+      const strengths = matched.length ? `Matched skills: ${matched.join(", ")}.` : "Resume uploaded, but matching skills were limited in the extracted text.";
+      const gapCount = Math.max(required.length - matched.length, 0);
+      const nextStep = gapCount === 0 ? "Looks ready for recruiter review." : `Check the remaining ${gapCount} skill requirement${gapCount === 1 ? "" : "s"} during screening.`;
+      return {
+        score,
+        summary: `${job.title || "Applicant"} profile captured. ${strengths} ${nextStep}`,
+      };
+    }
+
     async function extractCurrentResume() {
       if (!state.file) {
         updateExtractionCards();
@@ -490,7 +498,15 @@
     }
 
     async function submit() {
+      if (!state.file) {
+        setStatus("Please upload a resume before submitting.");
+        return;
+      }
+      if (!state.extracted) {
+        await extractCurrentResume();
+      }
       const extracted = state.extracted || {};
+      const analysis = analyzeAgainstJob(extracted);
       const payload = {
         id: `cand-${Date.now()}`,
         jobSlug: state.job?.slug || jobSlug,
@@ -504,8 +520,8 @@
         resumeSize: state.file ? state.file.size : 0,
         extractedText: extracted.rawText || "",
         extractedFields: extracted,
-        aiSummary: extracted.summary || `${el("fullName").value.trim() || "Applicant"} applied for ${state.job?.title || "the role"}.`,
-        matchScore: extracted.fullName ? 92 : 75,
+        aiSummary: analysis.summary,
+        matchScore: analysis.score,
         rating: 0,
         comments: "",
         status: "queued",
@@ -546,7 +562,7 @@
       const db = IntakeShared.getDemoDb();
       db.candidates.unshift(payload);
       IntakeShared.saveDemoDb(db);
-      setStatus("Application saved locally in demo storage.");
+      setStatus("Application saved locally in preview storage.");
       el("savedRecord").textContent = payload.id;
       el("savedSummary").textContent = payload.aiSummary;
     }
@@ -557,7 +573,7 @@
       try {
         state.services = await IntakeShared.connectFirebase(cfg);
         state.mode = "firebase";
-        setStatus("Firebase connected. This apply page now saves to Firestore and Storage.");
+        setStatus("Live upload is connected. Resume files and applicant records will save to the shared system.");
       } catch (error) {
         setStatus(`Firebase connect failed: ${error.message}`);
       }
@@ -569,11 +585,9 @@
     });
 
     document.getElementById("submitBtn").addEventListener("click", submit);
-    document.getElementById("loadDemoBtn").addEventListener("click", loadDemoApplicant);
 
     loadJob();
     connectIfConfigured();
-    loadDemoApplicant();
   </script>
 </body>
 </html>

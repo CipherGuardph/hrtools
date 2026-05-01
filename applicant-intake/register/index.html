@@ -196,20 +196,20 @@
 
   <main class="shell">
     <section class="panel">
-      <span class="badge">Firebase registration</span>
+      <span class="badge">Recruiter onboarding</span>
       <h1>Create Analyzer Account</h1>
-      <p class="lead">Create the Firebase email/password account that will open the intake dashboard. The project config is loaded from `config.js`.</p>
+      <p class="lead">Create the HR account that will open the protected intake dashboard and manage applicant submissions.</p>
 
       <div class="form-grid">
         <label class="wide">Email<input id="email" type="email" placeholder="admin@example.com"></label>
-        <label class="wide">Password<input id="password" type="password" placeholder="••••••••"></label>
+        <label class="wide">Password<input id="password" type="password" placeholder="Create a password"></label>
       </div>
 
       <div class="button-row">
         <button class="btn primary" id="createBtn" type="button">Create Account</button>
       </div>
 
-      <div class="notice" id="statusBox">Fill in the Firebase config and create the recruiter account.</div>
+      <div class="notice" id="statusBox">Create an HR account, then sign in to access the protected workspace.</div>
     </section>
   </main>
 
@@ -241,8 +241,8 @@
     el("createBtn").addEventListener("click", createAccount);
     const config = IntakeShared.getFirebaseConfig();
     el("statusBox").textContent = config && config.apiKey
-      ? "Firebase config loaded from config.js. You can create the account now."
-      : "Firebase config is missing. Add it to config.js before creating an account.";
+      ? "System connection loaded. You can create the account now."
+      : "System connection is missing. Add it to the internal config before creating the account.";
   </script>
 </body>
 </html>

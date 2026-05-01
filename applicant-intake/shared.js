@@ -215,9 +215,19 @@
         return;
       }
     } catch {
-      // fall through to text-only fallback
+      // fall through to the image fallback below
     }
-    container.textContent = value;
+    const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(value)}`;
+    const img = document.createElement("img");
+    img.alt = "QR code";
+    img.width = 240;
+    img.height = 240;
+    img.src = fallbackUrl;
+    img.style.width = "240px";
+    img.style.height = "240px";
+    img.style.display = "block";
+    container.appendChild(img);
+    state.qrReady = true;
   }
 
   window.IntakeShared = {

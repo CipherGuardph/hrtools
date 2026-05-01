@@ -16,6 +16,7 @@
       --amber: #f3c25d;
       --blue: #5e8fc8;
       --coral: #e9786e;
+      --lavender: #d8cff9;
       --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
     }
 
@@ -178,6 +179,11 @@
       gap: 8px;
     }
 
+    .stat:nth-child(1) { background: linear-gradient(180deg, #fff, #f6fcf8); }
+    .stat:nth-child(2) { background: linear-gradient(180deg, #fff, #eef7ff); }
+    .stat:nth-child(3) { background: linear-gradient(180deg, #fff, #fff8e9); }
+    .stat:nth-child(4) { background: linear-gradient(180deg, #fff, #fff0ee); }
+
     .stat span {
       color: var(--muted);
       font-size: 0.82rem;
@@ -282,6 +288,10 @@
       padding: 12px;
     }
 
+    .detail-card:nth-child(odd) {
+      background: linear-gradient(180deg, #ffffff, #f8fcf9);
+    }
+
     .detail-card span {
       display: block;
       color: var(--muted);
@@ -336,6 +346,12 @@
       line-height: 1.55;
     }
 
+    .danger {
+      background: #fff2f0;
+      border-color: #f2c5bf;
+      color: #8f2f23;
+    }
+
     @media (max-width: 1100px) {
       .stats, .grid {
         grid-template-columns: 1fr;
@@ -378,7 +394,7 @@
       </div>
       <div class="button-row">
         <a class="btn primary" href="/applicant-intake/apply/?job=cashier">Open applicant link</a>
-        <a class="btn" href="/applicant-intake/login/">Sign out</a>
+        <button class="btn" id="signOutBtn" type="button">Sign out</button>
       </div>
     </section>
 
@@ -399,7 +415,7 @@
         <div class="details">
           <div class="detail-card">
             <span>Public applicant link</span>
-            <strong id="qrLink">/applicant-intake/apply/?job=cashier</strong>
+            <strong id="qrLink">https://www.hr.cipherguardph.com/applicant-intake/apply/?job=cashier</strong>
           </div>
           <div class="notice">Applicants scan this code to open the public upload page and submit a resume without logging in.</div>
           <div class="button-row">
@@ -414,7 +430,7 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Candidate queue</h2>
-          <span class="badge" id="sourceBadge">Demo mode</span>
+          <span class="badge" id="sourceBadge">Loading</span>
         </div>
         <div class="table-wrap">
           <table>
@@ -441,7 +457,7 @@
         <div class="detail-card"><span>Email</span><strong id="dEmail">Select a candidate</strong></div>
         <div class="detail-card"><span>Phone</span><strong id="dPhone">Select a candidate</strong></div>
         <div class="detail-card"><span>Skills</span><strong id="dSkills">Select a candidate</strong></div>
-        <div class="detail-card"><span>Resume</span><strong id="dResume">Waiting</strong></div>
+        <div class="detail-card"><span>Resume</span><strong id="dResume">Waiting</strong><button class="btn" id="openResumeBtn" type="button">Open Resume</button></div>
         <div class="detail-card"><span>Notes</span><strong id="dNotes">Add notes, rate, and track interview status here.</strong></div>
       </aside>
     </section>
@@ -472,6 +488,7 @@
       <div class="button-row">
         <button class="btn primary" id="saveNoteBtn" type="button">Save Review</button>
         <button class="btn" id="interviewBtn" type="button">Mark Interview</button>
+        <button class="btn danger" id="deleteBtn" type="button">Delete Applicant</button>
       </div>
       <div class="notice" id="statusBox">Select a candidate to review their extracted information.</div>
     </section>
@@ -488,12 +505,24 @@
       jobs: demoStore.jobs.slice(),
       candidates: demoStore.candidates.slice(),
       selectedId: demoStore.candidates[0]?.id || null,
+      authReady: false,
+      unsubCandidates: null,
+      unsubJobs: null,
     };
 
-    const applicantUrl = `${window.location.origin}/applicant-intake/apply/?job=cashier`;
+    const applicantUrl = `${IntakeShared.getPublicBaseUrl()}/apply/?job=cashier`;
 
     function setStatus(message) {
       el("statusBox").textContent = message;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     function currentCandidate() {
@@ -516,11 +545,11 @@
     function renderRows() {
       el("rows").innerHTML = state.candidates.map(candidate => `
         <tr data-id="${candidate.id}" class="${candidate.id === state.selectedId ? "active" : ""}">
-          <td><strong>${candidate.fullName || "-"}</strong><br><span style="color:var(--muted)">${candidate.email || "-"}</span></td>
-          <td>${jobName(candidate.jobSlug)}</td>
-          <td>${candidate.aiSummary || candidate.extractedFields?.summary || "-"}</td>
-          <td><span class="score">${candidate.matchScore || 0}%</span></td>
-          <td>${candidate.status || "queued"}</td>
+          <td><strong>${escapeHtml(candidate.fullName || "-")}</strong><br><span style="color:var(--muted)">${escapeHtml(candidate.email || "-")}</span></td>
+          <td>${escapeHtml(jobName(candidate.jobSlug))}</td>
+          <td>${escapeHtml(candidate.aiSummary || candidate.extractedFields?.summary || "-")}</td>
+          <td><span class="score">${escapeHtml(candidate.matchScore || 0)}%</span></td>
+          <td>${escapeHtml(candidate.status || "queued")}</td>
         </tr>
       `).join("") || `<tr><td colspan="5">No candidates yet.</td></tr>`;
     }
@@ -535,6 +564,7 @@
         el("dSkills").textContent = "Select a candidate";
         el("dResume").textContent = "Waiting";
         el("dNotes").textContent = "Add notes, rate, and track interview status here.";
+        el("openResumeBtn").disabled = true;
         return;
       }
       el("selectedBadge").textContent = candidate.fullName || "Selected";
@@ -547,13 +577,14 @@
       el("statusSelect").value = candidate.status || "queued";
       el("matchScore").value = candidate.matchScore || 0;
       el("commentText").value = candidate.comments || "";
+      el("openResumeBtn").disabled = !(candidate.resumeUrl || candidate.resumePath);
     }
 
     function renderAll() {
       renderStats();
       renderRows();
       renderDetails();
-      el("sourceBadge").textContent = state.mode === "firebase" ? "Live backend" : "Demo mode";
+      el("sourceBadge").textContent = state.mode === "firebase" ? "Live backend" : "Local preview";
       el("qrLink").textContent = applicantUrl;
       IntakeShared.renderQr(el("qrBox"), applicantUrl);
     }
@@ -563,7 +594,7 @@
       state.jobs = demo.jobs.slice();
       state.candidates = demo.candidates.slice();
       if (!state.selectedId) state.selectedId = state.candidates[0]?.id || null;
-      setStatus("Demo data loaded. Sign in to use the live backend.");
+      setStatus("Local preview loaded. Sign in to use the live backend.");
       renderAll();
     }
 
@@ -579,9 +610,41 @@
         setStatus(`Saved changes for ${candidate.fullName}.`);
       } else {
         IntakeShared.saveDemoDb({ jobs: state.jobs, candidates: state.candidates });
-        setStatus(`Saved changes for ${candidate.fullName} in demo storage.`);
+        setStatus(`Saved changes for ${candidate.fullName} in local preview storage.`);
       }
       renderAll();
+    }
+
+    async function deleteCurrentCandidate() {
+      const candidate = currentCandidate();
+      if (!candidate) {
+        setStatus("Select a candidate first.");
+        return;
+      }
+      const ok = window.confirm(`Delete ${candidate.fullName || "this applicant"} from the queue? This removes the applicant record${candidate.resumePath ? " and the stored resume file" : ""}.`);
+      if (!ok) return;
+      try {
+        if (state.mode === "firebase" && state.services) {
+          if (candidate.resumePath) {
+            try {
+              await state.services.storage.ref(candidate.resumePath).delete();
+            } catch (error) {
+              console.warn("Resume delete skipped:", error);
+            }
+          }
+          await state.services.db.collection("candidates").doc(candidate.id).delete();
+          state.candidates = state.candidates.filter(item => item.id !== candidate.id);
+          setStatus(`Deleted ${candidate.fullName || "applicant"} from the live queue.`);
+        } else {
+          state.candidates = state.candidates.filter(item => item.id !== candidate.id);
+          IntakeShared.saveDemoDb({ jobs: state.jobs, candidates: state.candidates });
+          setStatus(`Deleted ${candidate.fullName || "applicant"} from local storage.`);
+        }
+        state.selectedId = state.candidates[0]?.id || null;
+        renderAll();
+      } catch (error) {
+        setStatus(`Delete failed: ${error.message}`);
+      }
     }
 
     function bindFirebase() {
@@ -594,18 +657,33 @@
       IntakeShared.connectFirebase(cfg).then(services => {
         state.services = services;
         state.mode = "firebase";
-        setStatus("Live backend connected.");
-        services.db.collection("candidates").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-          state.candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          if (!state.selectedId && state.candidates[0]) state.selectedId = state.candidates[0].id;
-          renderAll();
-        });
-        services.db.collection("jobs").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-          state.jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderAll();
+        services.auth.onAuthStateChanged(user => {
+          if (!user) {
+            window.location.href = `/applicant-intake/login/?next=${encodeURIComponent("/applicant-intake/dashboard/")}`;
+            return;
+          }
+          state.authReady = true;
+          setStatus("Live backend connected.");
+          if (state.unsubCandidates) state.unsubCandidates();
+          if (state.unsubJobs) state.unsubJobs();
+          state.unsubCandidates = services.db.collection("candidates").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+            state.candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            state.selectedId = state.candidates.some(item => item.id === state.selectedId)
+              ? state.selectedId
+              : (state.candidates[0]?.id || null);
+            renderAll();
+          });
+          state.unsubJobs = services.db.collection("jobs").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+            const liveJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (liveJobs.length) {
+              state.jobs = liveJobs;
+            }
+            renderAll();
+          });
         });
       }).catch(error => {
         setStatus(`Live backend connection failed: ${error.message}`);
+        renderAll();
       });
     }
 
@@ -630,26 +708,60 @@
       updateCandidate({ status: "interview", comments: (candidate.comments ? `${candidate.comments}\n` : "") + "Interview marked from dashboard." });
     });
 
+    el("deleteBtn").addEventListener("click", deleteCurrentCandidate);
+
+    el("openResumeBtn").addEventListener("click", async () => {
+      const candidate = currentCandidate();
+      if (!candidate) return;
+      try {
+        if (candidate.resumeUrl) {
+          window.open(candidate.resumeUrl, "_blank", "noopener");
+          return;
+        }
+        if (state.mode === "firebase" && state.services && candidate.resumePath) {
+          const url = await state.services.storage.ref(candidate.resumePath).getDownloadURL();
+          window.open(url, "_blank", "noopener");
+          return;
+        }
+        setStatus("No stored resume file is available for this applicant yet.");
+      } catch (error) {
+        setStatus(`Unable to open the stored resume: ${error.message}`);
+      }
+    });
+
+    el("signOutBtn").addEventListener("click", async () => {
+      try {
+        if (state.mode === "firebase" && state.services?.auth) {
+          await state.services.auth.signOut();
+        }
+      } finally {
+        window.location.href = "/applicant-intake/login/";
+      }
+    });
+
     el("downloadQrBtn").addEventListener("click", () => {
       const canvas = el("qrBox").querySelector("canvas");
-      if (!canvas) return setStatus("QR is still loading.", "error");
+      const img = el("qrBox").querySelector("img");
+      if (!canvas && !img) return setStatus("QR is still loading.", "error");
       const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
+      link.href = canvas ? canvas.toDataURL("image/png") : img.src;
       link.download = "instant-applicant-analyzer-qr.png";
       link.click();
     });
 
     el("printQrBtn").addEventListener("click", () => {
       const canvas = el("qrBox").querySelector("canvas");
-      if (!canvas) return setStatus("QR is still loading.", "error");
+      const img = el("qrBox").querySelector("img");
+      if (!canvas && !img) return setStatus("QR is still loading.", "error");
       const win = window.open("", "_blank", "width=900,height=1100");
       if (!win) return setStatus("Allow pop-ups to print the QR.", "error");
-      const dataUrl = canvas.toDataURL("image/png");
+      const dataUrl = canvas ? canvas.toDataURL("image/png") : img.src;
       win.document.write(`<!doctype html><html><head><title>Print QR</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#17211b}img{width:320px;height:320px;border:16px solid #fff;box-shadow:0 10px 26px rgba(0,0,0,.15)}.wrap{display:grid;gap:16px;justify-items:start}</style></head><body><div class="wrap"><h1>Instant Applicant Analyzer</h1><img src="${dataUrl}" alt="Applicant QR"><div>${applicantUrl}</div></div></body></html>`);
       win.document.close();
       win.onload = () => setTimeout(() => win.print(), 250);
     });
 
+    renderAll();
     const savedConfig = IntakeShared.getFirebaseConfig();
     if (savedConfig && savedConfig.apiKey && savedConfig.projectId && savedConfig.appId) {
       bindFirebase();
