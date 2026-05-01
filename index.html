@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HR Tools Home</title>
+  <title>YukiHR Tools</title>
   <style>
     :root {
       --ink: #17211b;
@@ -72,14 +72,6 @@
       box-shadow: 0 10px 24px rgba(47, 128, 116, 0.25);
     }
 
-    nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .nav-link,
     .button {
       min-height: 42px;
       border-radius: 8px;
@@ -88,8 +80,9 @@
       justify-content: center;
       gap: 9px;
       font-weight: 800;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--teal);
+      background: var(--teal);
+      color: #fff;
       padding: 0 14px;
       box-shadow: 0 2px 0 rgba(23, 33, 27, 0.04);
     }
@@ -99,22 +92,18 @@
       padding: 0 18px;
     }
 
-    .button.primary {
-      background: var(--teal);
-      border-color: var(--teal);
-      color: #fff;
-    }
-
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      grid-template-columns: minmax(0, 860px);
       align-items: center;
-      gap: clamp(24px, 4vw, 52px);
+      justify-content: center;
       padding: 26px clamp(18px, 5vw, 64px) 58px;
     }
 
     .copy {
       max-width: 760px;
+      text-align: center;
+      justify-self: center;
     }
 
     h1 {
@@ -133,172 +122,15 @@
 
     .actions {
       display: flex;
+      justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
       margin-top: 30px;
     }
 
-    .dashboard {
-      min-height: 560px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .dashboard-top {
-      min-height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px;
-      background: #17211b;
-      color: #fff;
-    }
-
-    .status {
-      min-height: 32px;
-      border-radius: 999px;
-      padding: 0 12px;
-      background: rgba(191, 231, 208, 0.16);
-      display: inline-flex;
-      align-items: center;
-      font-weight: 800;
-      color: #ddf3e5;
-    }
-
-    .dashboard-body {
-      padding: 18px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .stat {
-      min-height: 104px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 14px;
-      background: #fbfcfa;
-    }
-
-    .stat span {
-      display: block;
-      color: var(--muted);
-      font-weight: 800;
-      font-size: 0.84rem;
-    }
-
-    .stat strong {
-      display: block;
-      margin-top: 10px;
-      font-size: 1.85rem;
-      line-height: 1;
-    }
-
-    .tool-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .tool-row {
-      min-height: 82px;
-      display: grid;
-      grid-template-columns: 48px 1fr auto;
-      align-items: center;
-      gap: 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .tool-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      background: var(--lime);
-    }
-
-    .tool-row:nth-child(2) .tool-icon {
-      background: var(--amber);
-    }
-
-    .tool-row:nth-child(3) .tool-icon {
-      background: #dbe7fb;
-    }
-
-    .tool-row h2 {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .tool-row p {
-      margin: 3px 0 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .mini-btn {
-      min-height: 36px;
-      border-radius: 8px;
-      padding: 0 12px;
-      display: inline-flex;
-      align-items: center;
-      background: #edf6ef;
-      color: #256554;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .insights {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .insight {
-      border-radius: 8px;
-      padding: 16px;
-      color: #fff;
-      min-height: 126px;
-      display: grid;
-      align-content: end;
-      background: linear-gradient(135deg, var(--blue), var(--teal));
-    }
-
-    .insight:last-child {
-      background: linear-gradient(135deg, var(--coral), var(--amber));
-      color: #251b10;
-    }
-
-    .insight strong {
-      font-size: 1.8rem;
-      line-height: 1;
-    }
-
-    .insight span {
-      margin-top: 7px;
-      font-weight: 800;
-    }
-
     @media (max-width: 960px) {
       .hero {
         grid-template-columns: 1fr;
-      }
-
-      .dashboard {
-        min-height: auto;
       }
     }
 
@@ -308,29 +140,14 @@
         flex-direction: column;
       }
 
-      nav,
       .actions {
         width: 100%;
       }
 
-      .nav-link,
       .button {
         width: 100%;
       }
 
-      .stat-grid,
-      .insights {
-        grid-template-columns: 1fr;
-      }
-
-      .tool-row {
-        grid-template-columns: 48px 1fr;
-      }
-
-      .mini-btn {
-        grid-column: 1 / -1;
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -339,84 +156,21 @@
     <header>
       <a class="brand" href="/">
         <span class="mark">HR</span>
-        <span>HR Tools</span>
+        <span>YukiHR Tools</span>
       </a>
-      <nav aria-label="Main navigation">
-        <a class="nav-link" href="/hr-demo.html">HR Demo Page</a>
-        <a class="nav-link" href="/word-to-pdf-convert/">PDF to Word converter</a>
-      </nav>
     </header>
 
     <main class="hero">
       <section class="copy" aria-label="Home introduction">
-        <h1>HR Tools</h1>
-        <p class="lead">A practical home base for HR operations, employee records, document conversion, onboarding, leave planning, and workforce admin demos.</p>
+        <h1>YukiHR Tools</h1>
         <div class="actions">
-          <a class="button primary" href="/hr-demo.html">HR Demo Page</a>
           <a class="button" href="/word-to-pdf-convert/">PDF to Word converter</a>
+          <a class="button" href="/merge-pdf/">Merge PDF</a>
+          <a class="button" href="/ocr-extract/">OCR Extractor</a>
+          <a class="button" href="/applicant-intake/">Instant Applicant Analyzer</a>
         </div>
       </section>
 
-      <section class="dashboard" aria-label="Tools overview">
-        <div class="dashboard-top">
-          <strong>Operations workspace</strong>
-          <span class="status">Live demo</span>
-        </div>
-        <div class="dashboard-body">
-          <div class="stat-grid">
-            <article class="stat">
-              <span>Employees</span>
-              <strong>48</strong>
-            </article>
-            <article class="stat">
-              <span>Open Requests</span>
-              <strong>6</strong>
-            </article>
-            <article class="stat">
-              <span>Docs Ready</span>
-              <strong>12</strong>
-            </article>
-          </div>
-
-          <div class="tool-list">
-            <a class="tool-row" href="/hr-demo.html">
-              <span class="tool-icon">HR</span>
-              <span>
-                <h2>HR Demo Page</h2>
-                <p>Open the employee directory, leave calculator, onboarding checklist, and payroll preview.</p>
-              </span>
-              <span class="mini-btn">Open</span>
-            </a>
-            <a class="tool-row" href="/word-to-pdf-convert/">
-              <span class="tool-icon">PDF</span>
-              <span>
-                <h2>PDF to Word converter</h2>
-                <p>Upload a PDF, extract document text, preview the Word layout, and download a Word-compatible file.</p>
-              </span>
-              <span class="mini-btn">Convert</span>
-            </a>
-            <div class="tool-row">
-              <span class="tool-icon">ON</span>
-              <span>
-                <h2>Onboarding queue</h2>
-                <p>Track hiring tasks, manager intros, equipment, contracts, and benefits setup.</p>
-              </span>
-              <span class="mini-btn">Ready</span>
-            </div>
-          </div>
-
-          <div class="insights">
-            <article class="insight">
-              <strong>78%</strong>
-              <span>Onboarding completion</span>
-            </article>
-            <article class="insight">
-              <strong>3 min</strong>
-              <span>Document preparation time</span>
-            </article>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 </body>

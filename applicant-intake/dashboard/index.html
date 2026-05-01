@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instant Applicant Analyzer HR Dashboard</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #66726a;
+      --line: #dbe4dd;
+      --bg: #f6f8f4;
+      --panel: #ffffff;
+      --teal: #2f8174;
+      --mint: #c7ecd7;
+      --amber: #f3c25d;
+      --blue: #5e8fc8;
+      --coral: #e9786e;
+      --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, rgba(199, 236, 215, 0.42), transparent 18%), var(--bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px clamp(16px, 4vw, 32px);
+      background: #17211b;
+      color: #fff;
+    }
+
+    .brand, .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--mint), var(--amber));
+      color: #17211b;
+    }
+
+    .back {
+      min-height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #eef6ef;
+    }
+
+    .shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 22px 16px 42px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 6vw, 5.2rem);
+      line-height: 0.95;
+    }
+
+    .lead {
+      margin: 12px 0 0;
+      max-width: 860px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .badge {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+      width: fit-content;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .qr-panel {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .qr-box {
+      width: 240px;
+      height: 240px;
+      border-radius: 10px;
+      border: 12px solid #fff;
+      box-shadow: 0 14px 30px rgba(23, 33, 27, 0.14);
+      overflow: hidden;
+      background: #fff;
+      display: grid;
+      place-items: center;
+    }
+
+    .qr-link {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #edf7f0;
+      padding: 12px;
+      color: #245f4d;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.12rem;
+      letter-spacing: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 940px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 13px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    tbody tr {
+      cursor: pointer;
+    }
+
+    tbody tr:hover {
+      background: #fbfcfa;
+    }
+
+    tbody tr.active {
+      background: #edf7f0;
+    }
+
+    .score {
+      min-height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 10px;
+      background: #e9f5ef;
+      color: #245f4d;
+      font-weight: 900;
+    }
+
+    .details {
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 12px;
+    }
+
+    .detail-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .detail-card strong {
+      display: block;
+      word-break: break-word;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .notice {
+      border-left: 5px solid var(--teal);
+      background: #edf7f0;
+      color: #245f4d;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1100px) {
+      .stats, .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      header, .panel-head, .hero {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .button-row, .btn {
+        width: 100%;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/applicant-intake/">
+      <span class="mark">AI</span>
+      <span>Instant Applicant Analyzer</span>
+    </a>
+    <a class="back" href="/applicant-intake/">Back to entry</a>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <span class="badge">Protected workspace</span>
+        <h1>HR dashboard</h1>
+        <p class="lead">Review candidates, check extracted resume data, update status, and use the public applicant QR link to receive new submissions.</p>
+      </div>
+      <div class="button-row">
+        <a class="btn primary" href="/applicant-intake/apply/?job=cashier">Open applicant link</a>
+        <a class="btn" href="/applicant-intake/login/">Sign out</a>
+      </div>
+    </section>
+
+      <section class="stats">
+        <article class="stat"><span>Open jobs</span><strong id="statJobs">0</strong></article>
+        <article class="stat"><span>Candidates</span><strong id="statCandidates">0</strong></article>
+        <article class="stat"><span>New today</span><strong id="statNew">0</strong></article>
+        <article class="stat"><span>Top match</span><strong id="statTop">0%</strong></article>
+      </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Applicant QR</h2>
+        <span class="badge">Anonymous public upload</span>
+      </div>
+      <div class="qr-panel">
+        <div class="qr-box" id="qrBox"><div class="badge">QR loading</div></div>
+        <div class="details">
+          <div class="detail-card">
+            <span>Public applicant link</span>
+            <strong id="qrLink">/applicant-intake/apply/?job=cashier</strong>
+          </div>
+          <div class="notice">Applicants scan this code to open the public upload page and submit a resume without logging in.</div>
+          <div class="button-row">
+            <button class="btn primary" id="downloadQrBtn" type="button">Download QR</button>
+            <button class="btn" id="printQrBtn" type="button">Print QR</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Candidate queue</h2>
+          <span class="badge" id="sourceBadge">Demo mode</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Job</th>
+                <th>Summary</th>
+                <th>Match</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="panel details">
+        <div class="panel-head">
+          <h2>Candidate details</h2>
+          <span class="badge" id="selectedBadge">None selected</span>
+        </div>
+        <div class="detail-card"><span>Full name</span><strong id="dName">Select a candidate</strong></div>
+        <div class="detail-card"><span>Email</span><strong id="dEmail">Select a candidate</strong></div>
+        <div class="detail-card"><span>Phone</span><strong id="dPhone">Select a candidate</strong></div>
+        <div class="detail-card"><span>Skills</span><strong id="dSkills">Select a candidate</strong></div>
+        <div class="detail-card"><span>Resume</span><strong id="dResume">Waiting</strong></div>
+        <div class="detail-card"><span>Notes</span><strong id="dNotes">Add notes, rate, and track interview status here.</strong></div>
+      </aside>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Quick review</h2>
+        <span class="badge">Internal</span>
+      </div>
+      <div class="form-grid">
+        <label>Status
+          <select id="statusSelect">
+            <option>queued</option>
+            <option>reviewing</option>
+            <option>shortlisted</option>
+            <option>interview</option>
+            <option>hired</option>
+            <option>rejected</option>
+          </select>
+        </label>
+        <label>Match score
+          <input id="matchScore" type="number" min="0" max="100" step="1">
+        </label>
+        <label class="wide">Comment
+          <textarea id="commentText" placeholder="Add HR notes or interview feedback"></textarea>
+        </label>
+      </div>
+      <div class="button-row">
+        <button class="btn primary" id="saveNoteBtn" type="button">Save Review</button>
+        <button class="btn" id="interviewBtn" type="button">Mark Interview</button>
+      </div>
+      <div class="notice" id="statusBox">Select a candidate to review their extracted information.</div>
+    </section>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../shared.js"></script>
+  <script>
+    const el = id => document.getElementById(id);
+    const demoStore = IntakeShared.getDemoDb();
+    const state = {
+      services: null,
+      mode: "demo",
+      jobs: demoStore.jobs.slice(),
+      candidates: demoStore.candidates.slice(),
+      selectedId: demoStore.candidates[0]?.id || null,
+    };
+
+    const applicantUrl = `${window.location.origin}/applicant-intake/apply/?job=cashier`;
+
+    function setStatus(message) {
+      el("statusBox").textContent = message;
+    }
+
+    function currentCandidate() {
+      return state.candidates.find(item => item.id === state.selectedId) || state.candidates[0] || null;
+    }
+
+    function jobName(slug) {
+      return (state.jobs.find(job => job.slug === slug) || {}).title || slug || "-";
+    }
+
+    function renderStats() {
+      const top = state.candidates.reduce((max, candidate) => Math.max(max, Number(candidate.matchScore || 0)), 0);
+      const newCount = state.candidates.filter(candidate => candidate.status === "queued" || candidate.status === "new").length;
+      el("statJobs").textContent = state.jobs.length;
+      el("statCandidates").textContent = state.candidates.length;
+      el("statNew").textContent = newCount;
+      el("statTop").textContent = `${top || 0}%`;
+    }
+
+    function renderRows() {
+      el("rows").innerHTML = state.candidates.map(candidate => `
+        <tr data-id="${candidate.id}" class="${candidate.id === state.selectedId ? "active" : ""}">
+          <td><strong>${candidate.fullName || "-"}</strong><br><span style="color:var(--muted)">${candidate.email || "-"}</span></td>
+          <td>${jobName(candidate.jobSlug)}</td>
+          <td>${candidate.aiSummary || candidate.extractedFields?.summary || "-"}</td>
+          <td><span class="score">${candidate.matchScore || 0}%</span></td>
+          <td>${candidate.status || "queued"}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="5">No candidates yet.</td></tr>`;
+    }
+
+    function renderDetails() {
+      const candidate = currentCandidate();
+      if (!candidate) {
+        el("selectedBadge").textContent = "None selected";
+        el("dName").textContent = "Select a candidate";
+        el("dEmail").textContent = "Select a candidate";
+        el("dPhone").textContent = "Select a candidate";
+        el("dSkills").textContent = "Select a candidate";
+        el("dResume").textContent = "Waiting";
+        el("dNotes").textContent = "Add notes, rate, and track interview status here.";
+        return;
+      }
+      el("selectedBadge").textContent = candidate.fullName || "Selected";
+      el("dName").textContent = candidate.fullName || "-";
+      el("dEmail").textContent = candidate.email || candidate.extractedFields?.email || "-";
+      el("dPhone").textContent = candidate.phone || candidate.extractedFields?.phone || "-";
+      el("dSkills").textContent = candidate.skills || candidate.extractedFields?.skills || "-";
+      el("dResume").textContent = candidate.resumeName || candidate.resumeUrl || "No file yet";
+      el("dNotes").textContent = candidate.comments || candidate.extractedFields?.summary || "No notes yet.";
+      el("statusSelect").value = candidate.status || "queued";
+      el("matchScore").value = candidate.matchScore || 0;
+      el("commentText").value = candidate.comments || "";
+    }
+
+    function renderAll() {
+      renderStats();
+      renderRows();
+      renderDetails();
+      el("sourceBadge").textContent = state.mode === "firebase" ? "Live backend" : "Demo mode";
+      el("qrLink").textContent = applicantUrl;
+      IntakeShared.renderQr(el("qrBox"), applicantUrl);
+    }
+
+    function loadDemo() {
+      const demo = IntakeShared.getDemoDb();
+      state.jobs = demo.jobs.slice();
+      state.candidates = demo.candidates.slice();
+      if (!state.selectedId) state.selectedId = state.candidates[0]?.id || null;
+      setStatus("Demo data loaded. Sign in to use the live backend.");
+      renderAll();
+    }
+
+    function updateCandidate(patch) {
+      const candidate = currentCandidate();
+      if (!candidate) return;
+      Object.assign(candidate, patch);
+      if (state.mode === "firebase" && state.services) {
+        state.services.db.collection("candidates").doc(candidate.id).set({
+          ...candidate,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+        setStatus(`Saved changes for ${candidate.fullName}.`);
+      } else {
+        IntakeShared.saveDemoDb({ jobs: state.jobs, candidates: state.candidates });
+        setStatus(`Saved changes for ${candidate.fullName} in demo storage.`);
+      }
+      renderAll();
+    }
+
+    function bindFirebase() {
+      const cfg = IntakeShared.getFirebaseConfig();
+      if (!cfg || !cfg.apiKey || !cfg.projectId || !cfg.appId) {
+        setStatus("Internal config is not available yet.");
+        return;
+      }
+      window.__FIREBASE_CONFIG__ = cfg;
+      IntakeShared.connectFirebase(cfg).then(services => {
+        state.services = services;
+        state.mode = "firebase";
+        setStatus("Live backend connected.");
+        services.db.collection("candidates").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+          state.candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          if (!state.selectedId && state.candidates[0]) state.selectedId = state.candidates[0].id;
+          renderAll();
+        });
+        services.db.collection("jobs").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+          state.jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderAll();
+        });
+      }).catch(error => {
+        setStatus(`Live backend connection failed: ${error.message}`);
+      });
+    }
+
+    el("rows").addEventListener("click", event => {
+      const row = event.target.closest("tr[data-id]");
+      if (!row) return;
+      state.selectedId = row.dataset.id;
+      renderAll();
+    });
+
+    el("saveNoteBtn").addEventListener("click", () => {
+      updateCandidate({
+        status: el("statusSelect").value,
+        matchScore: Number(el("matchScore").value) || 0,
+        comments: el("commentText").value.trim(),
+      });
+    });
+
+    el("interviewBtn").addEventListener("click", () => {
+      const candidate = currentCandidate();
+      if (!candidate) return;
+      updateCandidate({ status: "interview", comments: (candidate.comments ? `${candidate.comments}\n` : "") + "Interview marked from dashboard." });
+    });
+
+    el("downloadQrBtn").addEventListener("click", () => {
+      const canvas = el("qrBox").querySelector("canvas");
+      if (!canvas) return setStatus("QR is still loading.", "error");
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "instant-applicant-analyzer-qr.png";
+      link.click();
+    });
+
+    el("printQrBtn").addEventListener("click", () => {
+      const canvas = el("qrBox").querySelector("canvas");
+      if (!canvas) return setStatus("QR is still loading.", "error");
+      const win = window.open("", "_blank", "width=900,height=1100");
+      if (!win) return setStatus("Allow pop-ups to print the QR.", "error");
+      const dataUrl = canvas.toDataURL("image/png");
+      win.document.write(`<!doctype html><html><head><title>Print QR</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#17211b}img{width:320px;height:320px;border:16px solid #fff;box-shadow:0 10px 26px rgba(0,0,0,.15)}.wrap{display:grid;gap:16px;justify-items:start}</style></head><body><div class="wrap"><h1>Instant Applicant Analyzer</h1><img src="${dataUrl}" alt="Applicant QR"><div>${applicantUrl}</div></div></body></html>`);
+      win.document.close();
+      win.onload = () => setTimeout(() => win.print(), 250);
+    });
+
+    const savedConfig = IntakeShared.getFirebaseConfig();
+    if (savedConfig && savedConfig.apiKey && savedConfig.projectId && savedConfig.appId) {
+      bindFirebase();
+    } else {
+      loadDemo();
+    }
+  </script>
+</body>
+</html>

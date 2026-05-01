@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apply</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #66726a;
+      --line: #dbe4dd;
+      --bg: #f6f8f4;
+      --panel: #ffffff;
+      --teal: #2f8174;
+      --mint: #c7ecd7;
+      --amber: #f3c25d;
+      --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, rgba(199, 236, 215, 0.4), transparent 18%), var(--bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px clamp(16px, 4vw, 32px);
+      background: #17211b;
+      color: #fff;
+    }
+
+    .brand, .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--mint), var(--amber));
+      color: #17211b;
+    }
+
+    .back {
+      min-height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #eef6ef;
+    }
+
+    .shell {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 36px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      line-height: 0.96;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .badge {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+      width: fit-content;
+    }
+
+    .job-card {
+      border-radius: 8px;
+      background: #edf7f0;
+      color: #245f4d;
+      padding: 14px;
+      border-left: 5px solid var(--teal);
+      line-height: 1.55;
+    }
+
+    .form-grid, .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .upload {
+      border: 2px dashed #b7c7bb;
+      border-radius: 8px;
+      background: #fbfdfb;
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .upload input { display: none; }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .notice {
+      border-left: 5px solid var(--teal);
+      background: #edf7f0;
+      color: #245f4d;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.55;
+    }
+
+    .field-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfa;
+    }
+
+    .field-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .field-card strong {
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .back, .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .form-grid, .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/applicant-intake/">
+      <span class="mark">AP</span>
+      <span>Apply Mobile</span>
+    </a>
+    <a class="back" href="/applicant-intake/">Back to Intake</a>
+  </header>
+
+  <main class="shell">
+    <section class="panel">
+      <span class="badge" id="jobBadge">Job loading...</span>
+      <h1 id="jobTitle">Apply</h1>
+      <p class="lead" id="jobDescription">We’re loading the job post linked to this QR code.</p>
+      <div class="job-card" id="jobMeta">Required skills and experience will appear here.</div>
+    </section>
+
+    <section class="panel">
+      <div class="badge">Applicant details</div>
+      <div class="form-grid">
+        <label>Full name<input id="fullName" type="text" value="Mika Reyes"></label>
+        <label>Email<input id="email" type="email" value="mika.reyes@example.com"></label>
+        <label>Phone<input id="phone" type="text" value="+63 917 222 0198"></label>
+        <label>LinkedIn / Portfolio<input id="portfolio" type="text" placeholder="Optional"></label>
+        <label class="wide">Short intro<textarea id="intro">I build clean UI systems and support internal tools with React and TypeScript.</textarea></label>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="badge">Resume upload</div>
+      <label class="upload">
+        <input id="resumeFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*">
+        <strong>Tap to upload resume</strong>
+        <span>PDF, DOCX, or image</span>
+        <span id="resumeName">No file selected</span>
+      </label>
+      <div class="button-row">
+        <button class="btn primary" id="submitBtn" type="button">Submit Application</button>
+        <button class="btn" id="loadDemoBtn" type="button">Load Demo Applicant</button>
+      </div>
+      <div class="notice" id="statusBox">Your application will save to Firebase when connected, or to local demo storage otherwise.</div>
+    </section>
+
+    <section class="panel">
+      <div class="badge">Extracted profile</div>
+      <div class="summary-grid">
+        <article class="field-card"><span>Full name</span><strong id="extractedName">Waiting for extraction</strong></article>
+        <article class="field-card"><span>Email</span><strong id="extractedEmail">Waiting for extraction</strong></article>
+        <article class="field-card"><span>Phone</span><strong id="extractedPhone">Waiting for extraction</strong></article>
+        <article class="field-card"><span>Skills</span><strong id="extractedSkills">Waiting for extraction</strong></article>
+        <article class="field-card"><span>Extraction method</span><strong id="extractionMethod">Queued</strong></article>
+        <article class="field-card"><span>Extraction status</span><strong id="extractionStatus">Queued</strong></article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="badge">What gets saved</div>
+      <div class="summary-grid">
+        <article class="field-card"><span>Resume file</span><strong id="savedResume">Waiting for upload</strong></article>
+        <article class="field-card"><span>Candidate record</span><strong id="savedRecord">Ready</strong></article>
+        <article class="field-card"><span>Job link</span><strong id="savedJobLink">-</strong></article>
+        <article class="field-card"><span>Auto summary</span><strong id="savedSummary">Ready</strong></article>
+      </div>
+    </section>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../shared.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const jobSlug = params.get("job") || "cashier";
+    const demoStore = IntakeShared.getDemoDb();
+    const state = {
+      services: null,
+      mode: "demo",
+      job: demoStore.jobs.find(item => item.slug === jobSlug) || demoStore.jobs[0],
+      file: null,
+      extracted: null,
+    };
+
+    const el = id => document.getElementById(id);
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[data-src="${src}"]`);
+        if (existing) {
+          if (existing.dataset.loaded === "true") {
+            resolve();
+            return;
+          }
+          existing.addEventListener("load", () => resolve(), { once: true });
+          existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.dataset.src = src;
+        script.addEventListener("load", () => {
+          script.dataset.loaded = "true";
+          resolve();
+        }, { once: true });
+        script.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+        document.head.appendChild(script);
+      });
+    }
+
+    function loadJob() {
+      const job = state.job || demoStore.jobs[0];
+      if (!job) return;
+      el("jobBadge").textContent = `Job: ${job.slug}`;
+      el("jobTitle").textContent = job.title;
+      el("jobDescription").textContent = job.description;
+      el("jobMeta").textContent = `Skills: ${job.requiredSkills || "-"} · Experience: ${job.experienceNeeded || "-"} · QR: ${job.qrUrl || "-"}`;
+      el("savedJobLink").textContent = `${IntakeShared.getPublicBaseUrl()}/?job=${job.slug}`;
+    }
+
+    function setStatus(text) {
+      el("statusBox").textContent = text;
+    }
+
+    function updateExtractionCards(data = {}) {
+      el("extractedName").textContent = data.fullName || "Waiting for extraction";
+      el("extractedEmail").textContent = data.email || "Waiting for extraction";
+      el("extractedPhone").textContent = data.phone || "Waiting for extraction";
+      el("extractedSkills").textContent = data.skills || "Waiting for extraction";
+      el("extractionMethod").textContent = data.method || "Queued";
+      el("extractionStatus").textContent = data.status || "Queued";
+      el("savedSummary").textContent = data.summary || "Ready";
+    }
+
+    function setFile(file) {
+      state.file = file;
+      state.extracted = null;
+      el("resumeName").textContent = file ? `${file.name} (${IntakeShared.formatBytes(file.size)})` : "No file selected";
+      el("savedResume").textContent = file ? file.name : "Waiting for upload";
+      updateExtractionCards();
+    }
+
+    function loadDemoApplicant() {
+      el("fullName").value = "Mika Reyes";
+      el("email").value = "mika.reyes@example.com";
+      el("phone").value = "+63 917 222 0198";
+      el("portfolio").value = "https://example.com/mika";
+      el("intro").value = "I have retail checkout experience and enjoy helping customers at the register.";
+      state.extracted = {
+        fullName: "Mika Reyes",
+        email: "mika.reyes@example.com",
+        phone: "+63 917 222 0198",
+        skills: "Cash handling, POS system, customer service",
+        method: "demo profile",
+        status: "Preview ready",
+        summary: "Retail cashier profile with customer service and checkout experience.",
+      };
+      setFile(null);
+      setStatus("Demo applicant loaded. Upload a resume to run extraction.");
+      updateExtractionCards(state.extracted);
+    }
+
+    async function extractPdf(file) {
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.js");
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.js";
+      const buffer = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+      const pages = Math.min(pdf.numPages, 3);
+      let text = "";
+      for (let i = 1; i <= pages; i += 1) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(" ") + "\n";
+      }
+      if (text.trim().length < 120) {
+        await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        const ocr = await window.Tesseract.recognize(canvas.toDataURL("image/png"), "eng");
+        text += `\n${ocr.data.text || ""}`;
+        return { text, method: "pdf ocr" };
+      }
+      return { text, method: "pdf text" };
+    }
+
+    async function extractDocx(file) {
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js");
+      const buffer = await file.arrayBuffer();
+      const result = await window.mammoth.extractRawText({ arrayBuffer: buffer });
+      return { text: result.value || "", method: "docx text" };
+    }
+
+    async function extractImage(file) {
+      await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+      const url = URL.createObjectURL(file);
+      try {
+        const result = await window.Tesseract.recognize(url, "eng");
+        return { text: result.data.text || "", method: "image ocr" };
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function parseResumeText(text) {
+      const normalized = String(text || "").replace(/\r/g, "");
+      const lines = normalized.split("\n").map(line => line.trim()).filter(Boolean);
+      const email = (normalized.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) || [])[0] || "";
+      const phone = (normalized.match(/(\+?\d[\d\s().-]{7,}\d)/) || [])[0] || "";
+      const nameLine = lines.find(line => /^[A-Za-z][A-Za-z.'-]+(?:\s+[A-Za-z][A-Za-z.'-]+){1,3}$/.test(line) && !/resume|curriculum|profile|summary/i.test(line)) || "";
+      const skillLine = lines.find(line => /^skills?\b/i.test(line)) || lines.find(line => /cash|customer|pos|retail|stock|inventory|service/i.test(line)) || "";
+      const summary = lines.slice(0, 4).join(" ").slice(0, 240) || "Resume text extracted.";
+      return {
+        fullName: nameLine,
+        email,
+        phone,
+        skills: skillLine.replace(/^skills?:?\s*/i, "").trim() || "Skills not clearly listed",
+        summary,
+      };
+    }
+
+    async function extractCurrentResume() {
+      if (!state.file) {
+        updateExtractionCards();
+        return;
+      }
+      setStatus("Extracting resume details...");
+      updateExtractionCards({ status: "Extracting...", method: "working" });
+      try {
+        const ext = (state.file.name.split(".").pop() || "").toLowerCase();
+        const result = ext === "pdf" ? await extractPdf(state.file)
+          : (ext === "docx" || ext === "doc") ? await extractDocx(state.file)
+          : await extractImage(state.file);
+        const parsed = parseResumeText(result.text);
+        state.extracted = {
+          ...parsed,
+          rawText: result.text,
+          method: result.method,
+          status: "Extraction complete",
+        };
+        updateExtractionCards(state.extracted);
+        setStatus("Resume extracted. HR can review the structured details after submission.");
+      } catch (error) {
+        state.extracted = {
+          fullName: "",
+          email: "",
+          phone: "",
+          skills: "",
+          method: "extraction failed",
+          status: error.message,
+          summary: "Extraction failed.",
+        };
+        updateExtractionCards(state.extracted);
+        setStatus(`Resume extraction failed: ${error.message}`);
+      }
+    }
+
+    async function submit() {
+      const extracted = state.extracted || {};
+      const payload = {
+        id: `cand-${Date.now()}`,
+        jobSlug: state.job?.slug || jobSlug,
+        fullName: el("fullName").value.trim() || extracted.fullName || "",
+        email: el("email").value.trim() || extracted.email || "",
+        phone: el("phone").value.trim() || extracted.phone || "",
+        portfolio: el("portfolio").value.trim(),
+        intro: el("intro").value.trim(),
+        skills: extracted.skills || "",
+        resumeName: state.file ? state.file.name : null,
+        resumeSize: state.file ? state.file.size : 0,
+        extractedText: extracted.rawText || "",
+        extractedFields: extracted,
+        aiSummary: extracted.summary || `${el("fullName").value.trim() || "Applicant"} applied for ${state.job?.title || "the role"}.`,
+        matchScore: extracted.fullName ? 92 : 75,
+        rating: 0,
+        comments: "",
+        status: "queued",
+        createdAt: new Date().toISOString(),
+      };
+
+      if (!payload.fullName || !payload.email) {
+        setStatus("Full name and email are required.");
+        return;
+      }
+
+      if (state.mode === "firebase" && state.services) {
+        try {
+          let resumePath = "";
+          let resumeUrl = "";
+          if (state.file) {
+            resumePath = `resumes/${payload.jobSlug}/${payload.id}/${state.file.name}`;
+            const ref = state.services.storage.ref(resumePath);
+            await ref.put(state.file);
+            resumeUrl = await ref.getDownloadURL();
+          }
+          await state.services.db.collection("candidates").doc(payload.id).set({
+            ...payload,
+            resumePath,
+            resumeUrl,
+            createdAt: state.services.firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          setStatus("Application submitted to Firestore.");
+          el("savedRecord").textContent = payload.id;
+          el("savedSummary").textContent = payload.aiSummary;
+          return;
+        } catch (error) {
+          setStatus(`Firebase submit failed: ${error.message}`);
+          return;
+        }
+      }
+
+      const db = IntakeShared.getDemoDb();
+      db.candidates.unshift(payload);
+      IntakeShared.saveDemoDb(db);
+      setStatus("Application saved locally in demo storage.");
+      el("savedRecord").textContent = payload.id;
+      el("savedSummary").textContent = payload.aiSummary;
+    }
+
+    async function connectIfConfigured() {
+      const cfg = IntakeShared.getFirebaseConfig();
+      if (!cfg || !cfg.apiKey || !cfg.projectId || !cfg.appId) return;
+      try {
+        state.services = await IntakeShared.connectFirebase(cfg);
+        state.mode = "firebase";
+        setStatus("Firebase connected. This apply page now saves to Firestore and Storage.");
+      } catch (error) {
+        setStatus(`Firebase connect failed: ${error.message}`);
+      }
+    }
+
+    document.getElementById("resumeFile").addEventListener("change", event => {
+      setFile(event.target.files[0] || null);
+      extractCurrentResume();
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", submit);
+    document.getElementById("loadDemoBtn").addEventListener("click", loadDemoApplicant);
+
+    loadJob();
+    connectIfConfigured();
+    loadDemoApplicant();
+  </script>
+</body>
+</html>

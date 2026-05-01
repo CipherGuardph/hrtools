@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OCR Extractor</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #657067;
+      --line: #dbe3dc;
+      --bg: #f6f8f4;
+      --panel: #ffffff;
+      --teal: #2e8074;
+      --mint: #bfe7d0;
+      --amber: #f3bf61;
+      --blue: #5e8fc8;
+      --coral: #e9796f;
+      --shadow: 0 18px 45px rgba(38, 58, 45, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    button, textarea, input { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px clamp(18px, 5vw, 58px);
+      background: #17211b;
+      color: #fff;
+    }
+
+    .brand, .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--mint), var(--amber));
+      color: #17211b;
+    }
+
+    .back {
+      min-height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #eef6ef;
+    }
+
+    .hero {
+      padding: 34px clamp(18px, 5vw, 58px) 20px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 5vw, 5.8rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 12px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .route-pill, .badge {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      padding: 0 clamp(18px, 5vw, 58px) 58px;
+      display: grid;
+      grid-template-columns: minmax(340px, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel, .results {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel-head, .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.17rem;
+      letter-spacing: 0;
+    }
+
+    .dropzone {
+      min-height: 164px;
+      border: 2px dashed #b7c7bb;
+      border-radius: 8px;
+      background: #fbfdfb;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .dropzone strong {
+      display: block;
+      font-size: 1.08rem;
+    }
+
+    .dropzone span span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .dropzone input { display: none; }
+
+    .file-info, .fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .info, .field-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfa;
+    }
+
+    .info span, .field-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .info strong, .field-card strong {
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .preview {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 220px;
+      background: #eef2ed;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 14px;
+    }
+
+    .preview img {
+      max-width: 100%;
+      max-height: 360px;
+      border-radius: 6px;
+      box-shadow: 0 12px 28px rgba(23, 33, 27, 0.16);
+    }
+
+    .preview-empty {
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 320px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    .status-card {
+      min-height: 86px;
+      border-radius: 8px;
+      background: #edf7f0;
+      padding: 14px;
+      color: #245f4d;
+      display: grid;
+      gap: 10px;
+      font-weight: 800;
+    }
+
+    .progress {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(46, 128, 116, 0.18);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width 260ms ease;
+    }
+
+    .results {
+      overflow: hidden;
+    }
+
+    .results-head {
+      min-height: 62px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfa;
+    }
+
+    .results-body {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .skills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 42px;
+    }
+
+    .skill {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 11px;
+      background: #e9f5ef;
+      color: #245f4d;
+      font-weight: 900;
+    }
+
+    .summary {
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(94, 143, 200, 0.18), rgba(191, 231, 208, 0.44));
+      border: 1px solid var(--line);
+      padding: 16px;
+      min-height: 142px;
+      color: #26322a;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      header, .panel-head, .results-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .back, .btn { width: 100%; justify-content: center; }
+      .file-info, .fields { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">
+      <span class="mark">OCR</span>
+      <span>HR Tools OCR</span>
+    </a>
+    <a class="back" href="/">Back Home</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>OCR Extractor</h1>
+      <p class="lead">Extract text from scanned PDFs or images, then identify useful candidate details like name, email, phone, role, skills, and summary.</p>
+    </div>
+    <span class="route-pill">/ocr-extract</span>
+  </section>
+
+  <main class="workspace">
+    <section class="panel" aria-label="OCR controls">
+      <div class="panel-head">
+        <h2>Scanned PDF or Image</h2>
+        <button class="btn" type="button" id="sampleBtn">Use Sample</button>
+      </div>
+
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" accept="application/pdf,image/*,.pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff">
+        <span>
+          <strong>Drop a scanned PDF or image here</strong>
+          <span>or click to choose a PDF, PNG, JPG, WEBP, or TIFF file</span>
+        </span>
+      </label>
+
+      <div class="file-info" aria-label="File details">
+        <div class="info">
+          <span>File</span>
+          <strong id="fileName">No file selected</strong>
+        </div>
+        <div class="info">
+          <span>Type</span>
+          <strong id="fileType">Waiting</strong>
+        </div>
+        <div class="info">
+          <span>Status</span>
+          <strong id="fileStatus">Ready</strong>
+        </div>
+      </div>
+
+      <div class="preview" id="preview">
+        <div class="preview-empty">Image or scanned page preview appears here</div>
+      </div>
+
+      <label>
+        <strong>Extracted text</strong>
+        <textarea id="textOutput">Upload a scanned PDF or image, then run OCR. You can also paste text here and run AI extraction.</textarea>
+      </label>
+
+      <div class="button-row">
+        <button class="btn primary" type="button" id="ocrBtn">Run OCR</button>
+        <button class="btn" type="button" id="aiBtn">AI Extract Fields</button>
+        <button class="btn" type="button" id="copyBtn">Copy Text</button>
+      </div>
+
+      <div class="status-card" aria-live="polite">
+        <span id="statusText">Ready to extract text from scanned PDFs or images.</span>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="results" aria-label="AI extraction results">
+      <div class="results-head">
+        <h2>AI Extraction</h2>
+        <span class="badge" id="resultBadge">Draft</span>
+      </div>
+      <div class="results-body">
+        <div class="fields">
+          <article class="field-card">
+            <span>Name</span>
+            <strong id="nameField">-</strong>
+          </article>
+          <article class="field-card">
+            <span>Email</span>
+            <strong id="emailField">-</strong>
+          </article>
+          <article class="field-card">
+            <span>Phone</span>
+            <strong id="phoneField">-</strong>
+          </article>
+          <article class="field-card">
+            <span>Role</span>
+            <strong id="roleField">-</strong>
+          </article>
+          <article class="field-card">
+            <span>Experience</span>
+            <strong id="experienceField">-</strong>
+          </article>
+          <article class="field-card">
+            <span>Confidence</span>
+            <strong id="confidenceField">-</strong>
+          </article>
+        </div>
+
+        <div>
+          <h2>Skills</h2>
+          <div class="skills" id="skillsList">
+            <span class="skill">No skills yet</span>
+          </div>
+        </div>
+
+        <div>
+          <h2>Summary</h2>
+          <div class="summary" id="summaryField">Run AI extraction after OCR to generate a structured profile summary.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const fileInput = document.querySelector("#fileInput");
+    const dropzone = document.querySelector("#dropzone");
+    const preview = document.querySelector("#preview");
+    const fileName = document.querySelector("#fileName");
+    const fileType = document.querySelector("#fileType");
+    const fileStatus = document.querySelector("#fileStatus");
+    const textOutput = document.querySelector("#textOutput");
+    const statusText = document.querySelector("#statusText");
+    const progressBar = document.querySelector("#progressBar");
+    const resultBadge = document.querySelector("#resultBadge");
+    let selectedFile = null;
+    let selectedImageUrl = "";
+
+    const skillBank = [
+      "JavaScript", "TypeScript", "React", "Node", "Python", "SQL", "Excel", "Payroll", "Recruiting",
+      "Onboarding", "Benefits", "HRIS", "Data Analysis", "Project Management", "Leadership", "Compliance",
+      "Customer Support", "Salesforce", "Figma", "Communication", "Training", "Operations"
+    ];
+
+    function formatType(file) {
+      if (!file) return "Waiting";
+      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) return "Scanned PDF";
+      if (file.type.startsWith("image/")) return "Image";
+      return file.type || "Document";
+    }
+
+    function setProgress(label, value) {
+      statusText.textContent = label;
+      progressBar.style.width = `${value}%`;
+    }
+
+    function renderImagePreview(src) {
+      preview.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "OCR source preview";
+      preview.appendChild(img);
+    }
+
+    async function renderPdfFirstPage(file) {
+      if (!window.pdfjsLib) {
+        preview.innerHTML = '<div class="preview-empty">PDF preview library is loading. OCR can still use pasted text or sample data.</div>';
+        return "";
+      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 1.6 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: context, viewport }).promise;
+      const url = canvas.toDataURL("image/png");
+      renderImagePreview(url);
+      return url;
+    }
+
+    async function loadFile(file) {
+      selectedFile = file;
+      selectedImageUrl = "";
+      fileName.textContent = file.name;
+      fileType.textContent = formatType(file);
+      fileStatus.textContent = "Loaded";
+      progressBar.style.width = "0%";
+      resultBadge.textContent = "Draft";
+      if (file.type.startsWith("image/")) {
+        selectedImageUrl = URL.createObjectURL(file);
+        renderImagePreview(selectedImageUrl);
+        statusText.textContent = "Image loaded. Run OCR to extract text.";
+      } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+        statusText.textContent = "PDF loaded. Rendering first scanned page for OCR.";
+        try {
+          selectedImageUrl = await renderPdfFirstPage(file);
+          statusText.textContent = "PDF first page rendered. Run OCR to extract text.";
+        } catch (error) {
+          preview.innerHTML = '<div class="preview-empty">Could not render this PDF locally. Try an image scan or paste text manually.</div>';
+          statusText.textContent = "PDF loaded, but preview rendering failed.";
+        }
+      }
+    }
+
+    async function runOcr() {
+      if (!selectedFile && !selectedImageUrl) {
+        statusText.textContent = "Choose a scanned PDF or image first, or use the sample.";
+        return;
+      }
+      setProgress("Preparing OCR", 12);
+      if (window.Tesseract && selectedImageUrl) {
+        try {
+          const result = await Tesseract.recognize(selectedImageUrl, "eng", {
+            logger: message => {
+              if (message.status === "recognizing text") {
+                setProgress("Recognizing text", Math.round((message.progress || 0) * 80) + 15);
+              }
+            }
+          });
+          textOutput.value = result.data.text.trim() || "OCR completed, but no readable text was found.";
+          fileStatus.textContent = "OCR complete";
+          setProgress("OCR complete. Run AI extraction next.", 100);
+          return;
+        } catch (error) {
+          textOutput.value = "OCR could not run in this browser session. Paste extracted text here or use the sample, then run AI extraction.";
+          fileStatus.textContent = "OCR fallback";
+          setProgress("OCR fallback ready", 100);
+          return;
+        }
+      }
+      textOutput.value = "OCR libraries are still loading. Paste text here or use the sample, then run AI extraction.";
+      fileStatus.textContent = "OCR fallback";
+      setProgress("OCR fallback ready", 100);
+    }
+
+    function extractFields() {
+      const text = textOutput.value;
+      const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || "-";
+      const phone = text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0] || "-";
+      const name = text.match(/(?:Name|Candidate|Applicant)[ \t]*[:\-][ \t]*([A-Z][A-Za-z.'-]+(?:[ \t]+[A-Z][A-Za-z.'-]+){0,3})/)?.[1]
+        || text.match(/^([A-Z][A-Za-z.'-]+(?:[ \t]+[A-Z][A-Za-z.'-]+){1,3})/m)?.[1]
+        || "-";
+      const role = text.match(/(?:Role|Title|Position)\s*[:\-]\s*([^\n]+)/i)?.[1]?.trim()
+        || text.match(/(?:HR|People|Operations|Engineer|Manager|Analyst|Recruiter|Specialist)[^\n,.]*/i)?.[0]?.trim()
+        || "-";
+      const experience = text.match(/(\d+\+?\s*(?:years|yrs)[^\n,.]*)/i)?.[1] || "-";
+      const skills = skillBank.filter(skill => new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(text));
+      const confidence = Math.min(98, 52 + (email !== "-" ? 10 : 0) + (phone !== "-" ? 10 : 0) + (name !== "-" ? 12 : 0) + Math.min(skills.length * 4, 14));
+
+      document.querySelector("#nameField").textContent = name;
+      document.querySelector("#emailField").textContent = email;
+      document.querySelector("#phoneField").textContent = phone;
+      document.querySelector("#roleField").textContent = role;
+      document.querySelector("#experienceField").textContent = experience;
+      document.querySelector("#confidenceField").textContent = `${confidence}%`;
+      document.querySelector("#skillsList").innerHTML = skills.length
+        ? skills.map(skill => `<span class="skill">${skill}</span>`).join("")
+        : '<span class="skill">No skills detected</span>';
+      document.querySelector("#summaryField").textContent = `${name === "-" ? "This candidate" : name} appears to match ${role === "-" ? "a general HR profile" : role}. Detected ${skills.length || "no"} listed skill${skills.length === 1 ? "" : "s"}${experience === "-" ? "" : ` and ${experience}`}. Review the extracted text before using these results.`;
+      resultBadge.textContent = "Fields extracted";
+      setProgress("AI extraction complete.", 100);
+    }
+
+    fileInput.addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (file) loadFile(file);
+    });
+
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.style.borderColor = "#2e8074";
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.style.borderColor = "#b7c7bb";
+    });
+
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.style.borderColor = "#b7c7bb";
+      const file = event.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+
+    document.querySelector("#sampleBtn").addEventListener("click", () => {
+      selectedFile = null;
+      selectedImageUrl = "";
+      fileName.textContent = "sample-scanned-resume.pdf";
+      fileType.textContent = "Scanned PDF";
+      fileStatus.textContent = "Sample OCR complete";
+      preview.innerHTML = '<div class="preview-empty"><strong>Sample scanned PDF</strong><br>OCR text has been extracted below.</div>';
+      textOutput.value = `Name: Maria Santos
+Email: maria.santos@example.com
+Phone: +63 917 555 0134
+Role: HR Operations Specialist
+Experience: 6 years in People Operations
+
+Skills: Payroll, HRIS, Onboarding, Benefits, Excel, Compliance, Training, Communication
+
+Maria has supported employee lifecycle operations, benefits administration, HR documentation, onboarding workflows, and payroll coordination for distributed teams.`;
+      setProgress("Sample OCR text loaded. Run AI extraction next.", 100);
+    });
+
+    document.querySelector("#ocrBtn").addEventListener("click", runOcr);
+    document.querySelector("#aiBtn").addEventListener("click", extractFields);
+    document.querySelector("#copyBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(textOutput.value);
+      statusText.textContent = "Extracted text copied.";
+    });
+  </script>
+</body>
+</html>
