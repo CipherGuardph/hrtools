@@ -1,5 +1,5 @@
 (function () {
-  const footerText = `Built by Chris Quinto ${new Date().getFullYear()}`;
+  const footerText = `built by cipherguardph.com | C. Quinto SaaS, CySec, AICo, MSPau ${new Date().getFullYear()} V1.0`;
   const footerClass = "global-footer";
 
   function ensureStyle() {
