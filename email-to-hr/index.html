@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HR Mail QR Generator</title>
+  <title>Website QR Generator</title>
   <style>
     :root {
       --ink: #17211b;
@@ -299,17 +299,17 @@
   <header>
     <a class="brand" href="../index.html">
       <span class="mark">HR</span>
-      <span>HR Mail QR Generator</span>
+      <span>Website QR Generator</span>
     </a>
     <a class="back" href="../index.html">Back Home</a>
   </header>
 
   <section class="hero">
     <div>
-      <h1>HR Mail QR Generator</h1>
-      <p class="lead">Enter the HR email address, generate a QR code, and print it so applicants can scan it and open a `mailto:` draft automatically, without revealing your email address.</p>
+      <h1>Website QR Generator</h1>
+      <p class="lead">Enter a website URL, generate a QR code, and print it so applicants can scan it and open your site directly.</p>
     </div>
-    <span class="pill">/email-to-hr</span>
+        <span class="pill">/email-to-hr</span>
   </section>
 
   <main class="workspace">
@@ -318,8 +318,9 @@
         <h2>QR Settings</h2>
       </div>
 
-      <label>HR email address
-        <input id="emailInput" type="email" placeholder="hr@company.com" value="hr@company.com">
+      <label>Website URL
+        <input id="emailInput" type="url" placeholder="https://yourwebsite.com" value="https://cipherguardph.com/">
+        <span style="color: var(--muted); font-size: 0.82rem; font-weight: 700;">The QR code will open <code id="mailtoPreview">https://cipherguardph.com/</code>.</span>
       </label>
 
       <div class="button-row">
@@ -330,11 +331,11 @@
 
     <aside class="panel qr-stage">
       <div class="callout">
-        Print this page or export the QR after generating it. When applicants scan the code, their device should open a new email draft addressed to HR.
+        Print this page or export the QR after generating it. When applicants scan the code, their device should open the website directly.
       </div>
 
       <div class="qr-box" id="qrBox" aria-label="Generated QR code"></div>
-      <p class="status" id="statusText">Ready to generate a QR code.</p>
+        <p class="status" id="statusText">Ready to generate a QR code.</p>
     </aside>
   </main>
 
@@ -345,33 +346,43 @@
       const emailInput = document.getElementById("emailInput");
       const qrBox = document.getElementById("qrBox");
       const statusText = document.getElementById("statusText");
+      const mailtoPreview = document.getElementById("mailtoPreview");
 
-      function isValidEmail(value) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+      function normalizeUrl(value) {
+        const raw = String(value || "").trim();
+        if (!raw) return null;
+        try {
+          return new URL(raw).toString();
+        } catch {
+          return null;
+        }
       }
 
-      function buildMailto() {
-        const email = emailInput.value.trim();
-        if (!isValidEmail(email)) return null;
-        return `mailto:${email}`;
+      function buildUrl() {
+        return normalizeUrl(emailInput.value);
+      }
+
+      function refreshMailtoPreview(url) {
+        mailtoPreview.textContent = url || "https://...";
       }
 
       async function render() {
-        const mailto = buildMailto();
+        const url = buildUrl();
+        refreshMailtoPreview(url);
 
-        if (!mailto) {
-          qrBox.innerHTML = "<div style='color: var(--muted); font-weight: 800; text-align: center; line-height: 1.5;'>Enter a valid HR email to generate the QR code.</div>";
-          statusText.textContent = "Waiting for a valid email address.";
+        if (!url) {
+          qrBox.innerHTML = "<div style='color: var(--muted); font-weight: 800; text-align: center; line-height: 1.5;'>Enter a valid website URL to generate the QR code.</div>";
+          statusText.textContent = "Waiting for a valid website URL.";
           return;
         }
 
-        qrBox.innerHTML = window.HrMailQr.buildQrSvg(mailto, {
+        qrBox.innerHTML = window.HrMailQr.buildQrSvg(url, {
           moduleSize: 12,
           quietZone: 4,
           dark: "#17211b",
           light: "#ffffff",
         });
-        statusText.textContent = "QR code generated. You can print this page now.";
+        statusText.textContent = `QR code generated for ${url}. You can print this page now.`;
       }
 
       document.getElementById("generateBtn").addEventListener("click", render);

@@ -175,6 +175,24 @@
       flex-wrap: wrap;
     }
 
+    .field-lock {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .field-lock input {
+      margin-top: 4px;
+      accent-color: var(--teal);
+    }
+
     .btn {
       min-height: 42px;
       border-radius: 8px;
@@ -324,13 +342,18 @@
 
       <div class="form-grid">
         <label class="wide">Message
-          <textarea id="messageInput" placeholder="Type the SMS message here.">Hi! You have an interview today!</textarea>
+          <textarea id="messageInput" placeholder="Type the SMS message here." disabled>Hi! You have an interview today!</textarea>
         </label>
         <label class="wide">Recipients, one per line
           <textarea id="numbersInput" placeholder="+63 9xx xxx xxxx
-..."></textarea>
+..." disabled></textarea>
         </label>
       </div>
+
+      <label class="field-lock">
+        <input id="fieldUnlock" type="checkbox">
+        <span>I understand that repeatedly sending nearly identical messages to the same number may be classified as spam. I want to unlock the fields for a new broadcast.</span>
+      </label>
 
       <div class="button-row">
         <button class="btn" type="button" id="sendBtn">Send via Secure API</button>
@@ -358,11 +381,21 @@
     (function () {
       const messageInput = document.getElementById("messageInput");
       const numbersInput = document.getElementById("numbersInput");
+      const fieldUnlock = document.getElementById("fieldUnlock");
       const countLabel = document.getElementById("countLabel");
       const payloadPreview = document.getElementById("payloadPreview");
       const statusText = document.getElementById("statusText");
       const configuredEndpoint = window.HR_SMS_BROADCAST_ENDPOINT || "";
       const apiEndpoint = configuredEndpoint || (window.location.protocol === "file:" ? "" : "/api/sms/broadcast");
+
+      function syncFieldLock() {
+        const unlocked = fieldUnlock.checked;
+        messageInput.disabled = !unlocked;
+        numbersInput.disabled = !unlocked;
+        statusText.textContent = unlocked
+          ? "Fields unlocked. Enter a new broadcast carefully."
+          : "Fields are locked to help avoid repeated messages. Check the box below to edit them.";
+      }
 
       function parseNumbers(text) {
         return String(text || "")
@@ -422,6 +455,12 @@
         element.addEventListener("change", refreshPreview);
       });
 
+      fieldUnlock.addEventListener("change", () => {
+        syncFieldLock();
+        refreshPreview();
+      });
+
+      syncFieldLock();
       refreshPreview();
     })();
   </script>
