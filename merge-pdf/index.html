@@ -445,6 +445,7 @@
       <div class="button-row">
         <button class="btn primary" type="button" id="mergeBtn" disabled>Merge PDF</button>
         <button class="btn" type="button" id="downloadBtn" disabled>Download Merged PDF</button>
+        <button class="btn" type="button" id="sampleBtn">Use Sample</button>
         <button class="btn danger" type="button" id="clearBtn">Clear</button>
       </div>
 
@@ -452,6 +453,10 @@
         <span id="statusText">Add at least two PDFs to create a merged file.</span>
         <div class="progress"><span id="progressBar"></span></div>
       </div>
+
+      <p class="lead" style="margin: 0; font-size: 0.95rem;">
+        It works best with normal, unlocked PDFs. Password-protected or damaged PDFs may fail. If the library file is missing, the page will show a loading/error state instead of silently merging.
+      </p>
     </section>
 
     <section class="preview" aria-label="Merge preview">
@@ -776,17 +781,20 @@
       render();
     });
 
-    document.querySelector("#sampleBtn").addEventListener("click", () => {
-      files = [
-        { id: "sample-1", file: null, name: "employee-handbook.pdf", size: 326000, pages: 2 },
-        { id: "sample-2", file: null, name: "benefits-summary.pdf", size: 184000, pages: 2 },
-        { id: "sample-3", file: null, name: "signed-policy-acknowledgement.pdf", size: 96000, pages: 1 }
-      ];
-      mergedBlob = null;
-      statusText.textContent = "Sample PDF queue loaded. Reorder files or merge now.";
-      progressBar.style.width = "0%";
-      render();
-    });
+    const sampleBtn = document.querySelector("#sampleBtn");
+    if (sampleBtn) {
+      sampleBtn.addEventListener("click", () => {
+        files = [
+          { id: "sample-1", file: null, name: "employee-handbook.pdf", size: 326000, pages: 2 },
+          { id: "sample-2", file: null, name: "benefits-summary.pdf", size: 184000, pages: 2 },
+          { id: "sample-3", file: null, name: "signed-policy-acknowledgement.pdf", size: 96000, pages: 1 }
+        ];
+        mergedBlob = null;
+        statusText.textContent = "Sample PDF queue loaded. Reorder files or merge now.";
+        progressBar.style.width = "0%";
+        render();
+      });
+    }
 
     mergeBtn.addEventListener("click", runMerge);
 
