@@ -1,5 +1,5 @@
 (function () {
-  const footerText = `built by cipherguardph.com | C. Quinto SaaS, CySec, AICo, MSPau ${new Date().getFullYear()} V1.0`;
+  const footerText = `built by <a href="https://cipherguardph.com/" target="_blank" rel="noopener noreferrer">cipherguardph.com</a> | C. Quinto SaaS, CySec, AICo, MSPau ${new Date().getFullYear()} V1.0`;
   const footerClass = "global-footer";
 
   function ensureStyle() {
@@ -34,7 +34,7 @@
     } else if (!footer.classList.contains(footerClass)) {
       footer.classList.add(footerClass);
     }
-    footer.textContent = footerText;
+    footer.innerHTML = footerText;
   }
 
   if (document.readyState === "loading") {

@@ -326,10 +326,6 @@
     </section>
 
     <aside class="panel summary">
-      <div class="callout">
-        Keep the PhilSMS credentials on the server only. This page calls a secure backend route, and the backend calls PhilSMS.
-      </div>
-
       <div class="stat-grid">
         <div class="stat-card">
           <span>Recipients</span>
@@ -353,6 +349,8 @@
       const countLabel = document.getElementById("countLabel");
       const payloadPreview = document.getElementById("payloadPreview");
       const statusText = document.getElementById("statusText");
+      const configuredEndpoint = window.HR_SMS_BROADCAST_ENDPOINT || "";
+      const apiEndpoint = configuredEndpoint || (window.location.protocol === "file:" ? "" : "/api/sms/broadcast");
 
       function parseNumbers(text) {
         return String(text || "")
@@ -386,8 +384,13 @@
           statusText.textContent = "Add a message first.";
           return;
         }
+        if (!apiEndpoint) {
+          statusText.textContent = "This page is opened from file://. Deploy it on Cloudflare Pages or set window.HR_SMS_BROADCAST_ENDPOINT to your live /api/sms/broadcast URL.";
+          return;
+        }
+        statusText.textContent = "Sending broadcast...";
         try {
-          const response = await fetch("/api/sms/broadcast", {
+          const response = await fetch(apiEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
