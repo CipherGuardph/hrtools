@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+import { auth, db, firebaseReady } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
@@ -38,6 +38,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!firebaseReady || !auth || !db) {
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+      return () => {};
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       setUser(authUser);
       if (!authUser) {
@@ -60,6 +67,7 @@ export function AuthProvider({ children }) {
     profile,
     loading,
     refreshProfile: async () => {
+      if (!firebaseReady || !auth || !db) return null;
       if (!auth.currentUser) return null;
       const snap = await getDoc(doc(db, 'users', auth.currentUser.uid));
       const next = snap.exists() ? snap.data() : null;

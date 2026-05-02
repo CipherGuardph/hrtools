@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppShell } from './components/AppShell';
+import { firebaseReady } from './services/firebase';
+import { FirebaseSetupNotice } from './components/FirebaseSetupNotice';
 
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((module) => ({ default: module.RegisterPage })));
@@ -17,6 +19,10 @@ const QueueDisplayPage = lazy(() => import('./pages/QueueDisplayPage').then((mod
 
 export default function App() {
   const { user, loading } = useAuth();
+
+  if (!firebaseReady) {
+    return <FirebaseSetupNotice />;
+  }
 
   if (loading) {
     return (
