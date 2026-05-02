@@ -24,7 +24,6 @@ export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
     const message = String(body?.message || "").trim();
-    const senderId = String(body?.senderId || context.env.PHILSMS_SENDER_ID || "").trim();
     const rawRecipients = Array.isArray(body?.recipients) ? body.recipients : [];
     const recipients = rawRecipients
       .map(normalizeRecipient)
@@ -47,10 +46,6 @@ export async function onRequestPost(context) {
       return json({ status: "error", message: "Missing Cloudflare variable: PHILSMS_API_TOKEN." }, 500);
     }
 
-    if (!senderId) {
-      return json({ status: "error", message: "Missing sender ID. Provide senderId in the request or set PHILSMS_SENDER_ID in Cloudflare." }, 500);
-    }
-
     const upstream = await fetch(`${baseUrl}/sms/send`, {
       method: "POST",
       headers: {
@@ -60,7 +55,6 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         recipient: recipients.join(","),
-        sender_id: senderId,
         type: hasUnicode(message) ? "unicode" : "plain",
         message,
       }),
