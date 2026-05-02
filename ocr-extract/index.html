@@ -458,8 +458,8 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="../vendor/tesseract/tesseract.min.js"></script>
+  <script src="../vendor/pdfjs/pdf.min.js"></script>
   <script>
     const fileInput = document.querySelector("#fileInput");
     const dropzone = document.querySelector("#dropzone");
@@ -474,6 +474,14 @@
     let selectedFile = null;
     let selectedImageUrl = "";
     let selectedPdfPageUrls = [];
+    let selectedPdfText = "";
+    const pdfWorkerPath = "../vendor/pdfjs/pdf.worker.min.js";
+    const tesseractConfig = {
+      workerPath: "../vendor/tesseract/worker.min.js",
+      corePath: "../vendor/tesseract/tesseract-core.wasm.js",
+      langPath: "../vendor/tesseract",
+      cacheMethod: "none",
+    };
 
     const skillBank = [
       "JavaScript", "TypeScript", "React", "Node", "Python", "SQL", "Excel", "Payroll", "Recruiting",
@@ -512,7 +520,7 @@
         preview.innerHTML = '<div class="preview-empty">PDF preview library is loading. Image to text can still use pasted text or sample data.</div>';
         return [];
       }
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerPath;
       const buffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
       const urls = [];
@@ -532,11 +540,27 @@
       return urls;
     }
 
+    async function extractPdfText(file) {
+      if (!window.pdfjsLib) return "";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerPath;
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const text = content.items.map(item => item.str || "").join(" ").replace(/\s{2,}/g, " ").trim();
+        if (text) pages.push(`Page ${pageNumber}\n${text}`);
+      }
+      return pages.join("\n\n");
+    }
+
     async function loadFile(file) {
       revokeBlobUrl(selectedImageUrl);
       selectedFile = file;
       selectedImageUrl = "";
       selectedPdfPageUrls = [];
+      selectedPdfText = "";
       fileName.textContent = file.name;
       fileType.textContent = formatType(file);
       fileStatus.textContent = "Loaded";
@@ -550,12 +574,19 @@
       } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
         statusText.textContent = "PDF loaded. Rendering the scanned pages for image-to-text.";
         try {
+          selectedPdfText = await extractPdfText(file);
           selectedPdfPageUrls = await renderPdfPageImages(file);
           selectedImageUrl = selectedPdfPageUrls[0] || "";
           fileStatus.textContent = "PDF preview ready";
-          statusText.textContent = selectedPdfPageUrls.length
+          if (selectedPdfText) {
+            textOutput.value = selectedPdfText;
+            statusText.textContent = "PDF contains readable text. Text was extracted directly; run AI extraction when ready.";
+            fileStatus.textContent = "PDF text extracted";
+          } else {
+            statusText.textContent = selectedPdfPageUrls.length
             ? `PDF preview ready. ${selectedPdfPageUrls.length} page${selectedPdfPageUrls.length === 1 ? "" : "s"} ready for image-to-text.`
             : "PDF loaded. Run image-to-text to extract text.";
+          }
         } catch (error) {
           preview.innerHTML = '<div class="preview-empty">Could not render this PDF locally. Try an image scan or paste text manually.</div>';
           statusText.textContent = "PDF loaded, but preview rendering failed.";
@@ -564,21 +595,34 @@
     }
 
     async function ocrSource(source, pageLabel) {
-      return Tesseract.recognize(source, "eng", {
-        logger: message => {
-          if (message.status === "recognizing text") {
-            const pageProgress = Math.round((message.progress || 0) * 72);
-            setProgress(`Recognizing ${pageLabel}`, Math.min(96, pageProgress + 20));
-          }
+      const logger = message => {
+        if (message.status === "recognizing text") {
+          const pageProgress = Math.round((message.progress || 0) * 72);
+          setProgress(`Recognizing ${pageLabel}`, Math.min(96, pageProgress + 20));
         }
-      });
+      };
+      try {
+        return await Tesseract.recognize(source, "eng", {
+          ...tesseractConfig,
+          logger,
+        });
+      } catch (localError) {
+        console.warn("Local OCR assets failed, retrying default Tesseract loader.", localError);
+        return Tesseract.recognize(source, "eng", { logger });
+      }
     }
 
     async function runOcr() {
       if (!selectedFile && !selectedImageUrl) {
-      statusText.textContent = "Choose a scanned PDF or image first, or use the sample.";
-      return;
-    }
+        statusText.textContent = "Choose a scanned PDF or image first, or use the sample.";
+        return;
+      }
+      if (selectedPdfText && selectedFile && (selectedFile.type === "application/pdf" || selectedFile.name.toLowerCase().endsWith(".pdf"))) {
+        textOutput.value = selectedPdfText;
+        fileStatus.textContent = "PDF text extracted";
+        setProgress("Readable PDF text extracted directly. Run AI extraction next.", 100);
+        return;
+      }
       setProgress("Preparing image-to-text", 12);
       if (window.Tesseract && (selectedPdfPageUrls.length || selectedImageUrl)) {
         try {

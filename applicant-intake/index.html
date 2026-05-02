@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instant Applicant Analyzer</title>
+  <title>Instant Applicant Analyzer - Under Construction</title>
   <style>
     :root {
       --ink: #17211b;
@@ -138,6 +138,12 @@
       border-color: var(--line);
     }
 
+    .button.ghost {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
     .hint {
       color: var(--muted);
       font-size: 0.95rem;
@@ -163,22 +169,21 @@
 <body>
   <div class="shell">
     <header>
-    <a class="brand" href="../index.html">
+      <a class="brand" href="../index.html">
         <span class="mark">AI</span>
         <span>Instant Applicant Analyzer</span>
       </a>
     </header>
 
     <main class="hero">
-      <section class="panel" aria-label="Authentication entry">
-        <span class="badge">Secure access</span>
+      <section class="panel" aria-label="Under construction notice">
+        <span class="badge">Under construction</span>
         <h1>Instant Applicant Analyzer</h1>
-        <p class="lead">Use your HR account to open the analyzer, create a new account, and manage applicant intake from one place.</p>
+        <p class="lead">This tool is being rebuilt right now. The analyzer will return soon with a refreshed intake flow, but it is not available yet.</p>
         <div class="actions">
-          <a class="button" href="./login/index.html?next=/applicant-intake/dashboard/">Login</a>
-          <a class="button secondary" href="./register/index.html?next=/applicant-intake/dashboard/">Create Account</a>
+          <a class="button ghost" href="../index.html">Back Home</a>
         </div>
-        <p class="hint">Use `admin` / `admin` to open the dashboard in this local build.</p>
+        <p class="hint">Please check back later for the full applicant intake experience.</p>
       </section>
     </main>
   </div>

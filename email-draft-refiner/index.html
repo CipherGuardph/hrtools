@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Draft Refiner</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #66736a;
+      --line: #dce5df;
+      --bg: #f5f7f2;
+      --panel: #ffffff;
+      --teal: #2f8074;
+      --mint: #c7ecd7;
+      --amber: #f2bf61;
+      --shadow: 0 20px 50px rgba(30, 44, 35, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(199, 236, 215, 0.36), transparent 34%),
+        linear-gradient(315deg, rgba(242, 191, 97, 0.12), transparent 30%),
+        var(--bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px clamp(16px, 4vw, 32px);
+      background: #17211b;
+      color: #fff;
+    }
+
+    .brand, .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--mint), var(--amber));
+      color: #17211b;
+    }
+
+    .back {
+      min-height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #eef6ef;
+    }
+
+    .hero {
+      padding: 30px clamp(16px, 4vw, 32px) 18px;
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      line-height: 0.95;
+    }
+
+    .lead {
+      margin: 12px 0 0;
+      max-width: 780px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .pill {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(16px, 4vw, 32px) 48px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 0.84fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.08rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 240px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .notice {
+      border-left: 5px solid var(--teal);
+      background: #edf7f0;
+      color: #245f4d;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.55;
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 12px;
+    }
+
+    .summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .summary-card strong {
+      display: block;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .issue-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .issue {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .issue strong {
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    .issue span {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .issue.good {
+      background: #edf7f0;
+      border-color: #cfe7d8;
+    }
+
+    .output {
+      min-height: 280px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide {
+        grid-column: auto;
+      }
+
+      .back, .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">
+      <span class="mark">ED</span>
+      <span>Email Draft Refiner</span>
+    </a>
+    <a class="back" href="../index.html">Back Home</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Email Draft Refiner</h1>
+      <p class="lead">Paste a rough HR email, choose the purpose and tone, and turn it into a polished message with cleaner spelling, grammar, and professional wording.</p>
+    </div>
+    <span class="pill">/email-draft-refiner</span>
+  </section>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Draft Input</h2>
+        <button class="btn" type="button" id="sampleBtn">Use Sample</button>
+      </div>
+
+      <div class="form-grid">
+        <label>Recipient name
+          <input id="recipientName" type="text" placeholder="Hiring Team">
+        </label>
+        <label>Tone
+          <select id="toneSelect">
+            <option value="professional">Professional</option>
+            <option value="warm">Warm</option>
+            <option value="concise">Concise</option>
+            <option value="firm">Firm</option>
+          </select>
+        </label>
+        <label>Email purpose
+          <select id="purposeSelect">
+            <option value="general">General HR message</option>
+            <option value="candidate_followup">Candidate follow-up</option>
+            <option value="interview_invite">Interview invitation</option>
+            <option value="application_update">Application update</option>
+            <option value="rejection">Rejection note</option>
+            <option value="internal">Internal HR note</option>
+          </select>
+        </label>
+        <label class="wide">Your name
+          <input id="senderName" type="text" placeholder="Alex">
+        </label>
+        <label class="wide">Rough draft
+          <textarea id="draftInput" placeholder="Write or paste the email you want refined...">hey team - just wanted to follow up on the interview and see if you got a chance to review my resume. let me know if you need anything else from me. thanks!</textarea>
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button class="btn primary" type="button" id="refineBtn">Refine Draft</button>
+        <button class="btn" type="button" id="checkBtn">Check Grammar & Spelling</button>
+        <button class="btn" type="button" id="copyBtn">Copy Refined Text</button>
+      </div>
+
+      <div class="notice" id="statusBox">Ready to refine an email draft.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Refined Email</h2>
+        <span class="pill" id="resultBadge">Draft</span>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span>Subject suggestion</span>
+          <strong id="subjectField">Review and refine your email to generate a subject line.</strong>
+        </div>
+        <div class="summary-card">
+          <span>Key improvements</span>
+          <strong id="changesField">Polish the tone, remove filler words, and make the request clearer.</strong>
+        </div>
+        <div class="summary-card">
+          <span>Grammar and spelling</span>
+          <strong id="checkField">Run a check to flag common mistakes before sending.</strong>
+        </div>
+      </div>
+
+      <div>
+        <h2>Issues Found</h2>
+        <ul class="issue-list" id="issueList">
+          <li class="issue good">
+            <strong>No issues yet</strong>
+            <span>Run grammar and spelling checks on a draft to see suggestions here.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="output" id="outputBox">Your refined email will appear here.</div>
+    </section>
+  </main>
+
+  <script>
+    const el = id => document.getElementById(id);
+
+    const toneProfiles = {
+      professional: {
+        greeting: "Hello",
+        closing: "Best regards,",
+        phrases: [
+          [/hey/gi, "hello"],
+          [/just wanted to/gi, "I wanted to"],
+          [/can you/gi, "Could you"],
+          [/could you please/gi, "Could you please"],
+          [/let me know if you need anything else from me/gi, "Please let me know if you need anything else from me"],
+          [/thanks!?/gi, "Thank you"],
+        ],
+      },
+      warm: {
+        greeting: "Hi",
+        closing: "Warm regards,",
+        phrases: [
+          [/hey/gi, "hi"],
+          [/just wanted to/gi, "I wanted to"],
+          [/can you/gi, "Would you be able to"],
+          [/thanks!?/gi, "Thank you so much"],
+        ],
+      },
+      concise: {
+        greeting: "Hi",
+        closing: "Thanks,",
+        phrases: [
+          [/just wanted to/gi, ""],
+          [/wanted to follow up on/gi, "following up on"],
+          [/let me know if you need anything else from me/gi, "Let me know if you need anything else."],
+          [/thanks!?/gi, "Thanks"],
+        ],
+      },
+      firm: {
+        greeting: "Hello",
+        closing: "Regards,",
+        phrases: [
+          [/just wanted to/gi, "I am writing to"],
+          [/can you/gi, "Please"],
+          [/could you/gi, "Please"],
+          [/let me know if you need anything else from me/gi, "Please let me know if anything else is needed from me."],
+        ],
+      },
+    };
+
+    function cleanText(value) {
+      return String(value || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function sentenceCase(text) {
+      return cleanText(text)
+        .replace(/\bi\b/g, "I")
+        .replace(/(^|[.!?]\s+)([a-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase());
+    }
+
+    function applyToneRewrites(text, tone) {
+      let result = text;
+      for (const [pattern, replacement] of toneProfiles[tone].phrases) {
+        result = result.replace(pattern, replacement);
+      }
+      result = result
+        .replace(/\bASAP\b/g, "as soon as possible")
+        .replace(/\breally\b/gi, "")
+        .replace(/\bkind of\b/gi, "")
+        .replace(/\bjust\b/gi, "");
+      return result.replace(/[ \t]{2,}/g, " ").replace(/\n[ \t]+/g, "\n").trim();
+    }
+
+    function ensureGreeting(text, tone, recipientName) {
+      const profile = toneProfiles[tone];
+      const greetingName = recipientName || "";
+      const greeting = greetingName ? `${profile.greeting} ${greetingName},` : `${profile.greeting},`;
+      const firstLine = text.split("\n")[0].trim();
+      const greetingRegex = /^(hi|hello|hey|dear)\b/i;
+      if (greetingRegex.test(firstLine)) return text;
+      return `${greeting}\n\n${text}`;
+    }
+
+    function ensureClosing(text, tone, senderName) {
+      const profile = toneProfiles[tone];
+      const closingName = senderName || "Your Name";
+      if (/(best|regards|thanks|sincerely|warm regards),?\s*$/i.test(text)) {
+        return text;
+      }
+      return `${text}\n\n${profile.closing}\n${closingName}`;
+    }
+
+    function buildSubject(text, tone, purpose) {
+      const subjectByPurpose = {
+        candidate_followup: "Follow-up on your application",
+        interview_invite: "Interview invitation",
+        application_update: "Update on your application",
+        rejection: "Update on your application status",
+        internal: "HR follow-up",
+        general: "HR follow-up",
+      };
+      if (tone === "firm" && purpose === "internal") return "Action needed: HR follow-up";
+      if (subjectByPurpose[purpose]) return subjectByPurpose[purpose];
+      const firstSentence = cleanText(text).split(/[.!?]\s+/)[0] || "Follow up";
+      const base = firstSentence.replace(/^(hi|hello|hey|dear)\s+/i, "").replace(/[,.:;\-]+$/g, "").trim();
+      return `Follow-up on ${base || "your message"}`;
+    }
+
+    const spellingMap = [
+      [/\brecieve\b/gi, "receive"],
+      [/\bdefinately\b/gi, "definitely"],
+      [/\bseperate\b/gi, "separate"],
+      [/\boccassionally\b/gi, "occasionally"],
+      [/\bthier\b/gi, "their"],
+      [/\bteh\b/gi, "the"],
+      [/\balot\b/gi, "a lot"],
+      [/\bwierd\b/gi, "weird"],
+      [/\bcomming\b/gi, "coming"],
+      [/\buntill\b/gi, "until"],
+      [/\bknowlege\b/gi, "knowledge"],
+      [/\bconcious\b/gi, "conscious"],
+      [/\bresponce\b/gi, "response"],
+      [/\bacheive\b/gi, "achieve"],
+      [/\benviroment\b/gi, "environment"],
+      [/\bexperiance\b/gi, "experience"],
+      [/\breciept\b/gi, "receipt"],
+      [/\blatddder\b/gi, "later"],
+      [/\blatter\b/gi, "later"],
+      [/\bapplicaiton\b/gi, "application"],
+      [/\binterviev\b/gi, "interview"],
+      [/\binterveiw\b/gi, "interview"],
+      [/\bcandiate\b/gi, "candidate"],
+      [/\bcandidte\b/gi, "candidate"],
+      [/\bscedule\b/gi, "schedule"],
+      [/\bschedual\b/gi, "schedule"],
+      [/\bavailble\b/gi, "available"],
+      [/\bavailibility\b/gi, "availability"],
+      [/\bappriciate\b/gi, "appreciate"],
+      [/\boppertunity\b/gi, "opportunity"],
+      [/\boppurtunity\b/gi, "opportunity"],
+      [/\binconvienience\b/gi, "inconvenience"],
+    ];
+
+    const grammarMap = [
+      { pattern: /\byour\s+welcome\b/gi, fix: "you're welcome", label: "your/you're mix-up" },
+      { pattern: /\btheir\s+going\b/gi, fix: "they're going", label: "their/they're mix-up" },
+      { pattern: /\bthere\s+going\b/gi, fix: "they're going", label: "there/they're mix-up" },
+      { pattern: /\bits\s+a\b/gi, fix: "it's a", label: "its/it's mix-up" },
+      { pattern: /\bshould\s+of\b/gi, fix: "should have", label: "should of -> should have" },
+      { pattern: /\bcould\s+of\b/gi, fix: "could have", label: "could of -> could have" },
+      { pattern: /\bwould\s+of\b/gi, fix: "would have", label: "would of -> would have" },
+      { pattern: /\bain't\b/gi, fix: "isn't", label: "informal contraction" },
+      { pattern: /\bi am wanting to\b/gi, fix: "I would like to", label: "awkward construction" },
+      { pattern: /\bi want to ask\b/gi, fix: "I would like to ask", label: "professional wording" },
+    ];
+
+    const commonWords = [
+      "later", "please", "thank", "thanks", "meeting", "follow", "review", "resume", "schedule",
+      "attached", "regards", "hello", "update", "confirm", "available", "interview", "tomorrow",
+      "today", "email", "draft", "refine", "grammar", "spelling", "professional", "warm",
+      "concise", "firm", "response", "team", "opportunity", "project", "candidate", "manager",
+      "message", "company", "details", "support", "help", "discussion", "question", "next",
+      "steps", "soon", "later", "kindly", "address", "note", "request", "followup",
+      "application", "status", "availability", "appreciate", "additional", "information",
+    ];
+
+    function collapseRepeatedLetters(word) {
+      return String(word || "").replace(/([a-z])\1{2,}/gi, "$1");
+    }
+
+    function levenshtein(a, b) {
+      const left = String(a || "").toLowerCase();
+      const right = String(b || "").toLowerCase();
+      const rows = Array.from({ length: left.length + 1 }, (_, i) => [i]);
+      for (let j = 0; j <= right.length; j += 1) rows[0][j] = j;
+      for (let i = 1; i <= left.length; i += 1) {
+        for (let j = 1; j <= right.length; j += 1) {
+          const cost = left[i - 1] === right[j - 1] ? 0 : 1;
+          rows[i][j] = Math.min(
+            rows[i - 1][j] + 1,
+            rows[i][j - 1] + 1,
+            rows[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return rows[left.length][right.length];
+    }
+
+    function findClosestCommonWord(word) {
+      const collapsed = collapseRepeatedLetters(word).toLowerCase();
+      let best = null;
+      for (const candidate of commonWords) {
+        const distance = levenshtein(collapsed, candidate);
+        if (!best || distance < best.distance || (distance === best.distance && candidate.length < best.word.length)) {
+          best = { word: candidate, distance };
+        }
+      }
+      return best && best.distance <= 2 ? best.word : "";
+    }
+
+    function applyAutoCorrections(text) {
+      let corrected = cleanText(text);
+
+      spellingMap.forEach(([pattern, replacement]) => {
+        corrected = corrected.replace(pattern, replacement);
+      });
+
+      grammarMap.forEach(rule => {
+        corrected = corrected.replace(rule.pattern, rule.fix);
+      });
+
+      corrected = corrected.replace(/\b[A-Za-z][A-Za-z'-]*\b/g, word => {
+        if (!/([a-z])\1{2,}/i.test(word)) return word;
+        const suggestion = findClosestCommonWord(word);
+        return suggestion || word;
+      });
+
+      corrected = corrected
+        .replace(/\bASAP\b/g, "as soon as possible")
+        .replace(/\ba lot\b/gi, "a lot")
+        .replace(/\breally\b/gi, "")
+        .replace(/\bkind of\b/gi, "")
+        .replace(/\bjust\b/gi, "");
+
+      corrected = corrected.replace(/[ \t]{2,}/g, " ").replace(/\n[ \t]+/g, "\n").trim();
+      return corrected;
+    }
+
+    function professionalizeWording(text, purpose) {
+      let polished = cleanText(text)
+        .replace(/\bgot a chance to\b/gi, "had an opportunity to")
+        .replace(/\bsee if\b/gi, "confirm whether")
+        .replace(/\blet me know\b/gi, "please let me know")
+        .replace(/\banything else from me\b/gi, "any additional information from me")
+        .replace(/\byou guys\b/gi, "your team")
+        .replace(/\bno worries\b/gi, "thank you for your understanding")
+        .replace(/\bsorry to bother you\b/gi, "thank you for your time")
+        .replace(/\bi wanna\b/gi, "I would like to")
+        .replace(/\bi want to\b/gi, "I would like to")
+        .replace(/\bcan you\b/gi, "could you please")
+        .replace(/\bneed this\b/gi, "would appreciate this")
+        .replace(/\bthanks\b/gi, "thank you");
+
+      if (purpose === "candidate_followup") {
+        polished = polished
+          .replace(/\bfollow up on the interview\b/gi, "follow up on the interview process")
+          .replace(/\bfollow up on my resume\b/gi, "follow up on my application materials");
+      }
+
+      if (purpose === "interview_invite") {
+        polished = polished
+          .replace(/\bcome in for an interview\b/gi, "join us for an interview")
+          .replace(/\bwhen are you free\b/gi, "please share your availability");
+      }
+
+      if (purpose === "rejection") {
+        polished = polished
+          .replace(/\byou did not get the job\b/gi, "we will not be moving forward with your application")
+          .replace(/\bwe rejected\b/gi, "we will not be moving forward with");
+      }
+
+      return polished.replace(/[ \t]{2,}/g, " ").trim();
+    }
+
+    function stripExistingGreetingAndClosing(text) {
+      return cleanText(text)
+        .replace(/^(hi|hello|hey|dear)(?:\s+[^,:\n.!?-]{1,40})?\s*[,:\-]\s*/i, "")
+        .replace(/\n?\s*(best regards|warm regards|regards|thanks|thank you|sincerely)[,.!]?\s*[\w .'-]*\s*$/i, "")
+        .trim();
+    }
+
+    function ensureEndingPunctuation(text) {
+      const trimmed = cleanText(text);
+      if (!trimmed) return "";
+      return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+    }
+
+    function buildProfessionalBody(text, purpose) {
+      const stripped = stripExistingGreetingAndClosing(text);
+      const sentences = stripped
+        .replace(/\s*-\s*/g, ". ")
+        .split(/(?<=[.!?])\s+|\n+/)
+        .map(sentence => ensureEndingPunctuation(sentenceCase(sentence)))
+        .filter(Boolean);
+
+      if (!sentences.length) return "";
+
+      const purposeOpeners = {
+        candidate_followup: "I am following up regarding the application process.",
+        interview_invite: "Thank you for your interest in the role.",
+        application_update: "I am writing to share an update regarding the application process.",
+        rejection: "Thank you for taking the time to apply and speak with our team.",
+        internal: "I am following up regarding the HR item below.",
+        general: "",
+      };
+
+      const purposeClosers = {
+        candidate_followup: "Please let me know if there are any updates or if you need any additional information from me.",
+        interview_invite: "Please share your availability so we can confirm the interview schedule.",
+        application_update: "Please let me know if you have any questions about the next steps.",
+        rejection: "We appreciate your interest and wish you the best in your job search.",
+        internal: "Please let me know if any additional details are needed.",
+        general: "",
+      };
+
+      const paragraphs = [];
+      if (purposeOpeners[purpose] && !sentences.some(sentence => sentence.toLowerCase().includes(purposeOpeners[purpose].toLowerCase().slice(0, 24)))) {
+        paragraphs.push(purposeOpeners[purpose]);
+      }
+      paragraphs.push(sentences.join(" "));
+      if (purposeClosers[purpose] && !paragraphs.join(" ").toLowerCase().includes(purposeClosers[purpose].toLowerCase().slice(0, 28))) {
+        paragraphs.push(purposeClosers[purpose]);
+      }
+
+      return paragraphs.join("\n\n");
+    }
+
+    function checkGrammarAndSpelling(text) {
+      const issues = [];
+      const normalized = cleanText(text);
+      if (!normalized) {
+        return [{
+          type: "good",
+          title: "No text to check",
+          detail: "Paste a draft into the editor first.",
+        }];
+      }
+
+      spellingMap.forEach(([pattern, replacement]) => {
+        const matches = normalized.match(pattern);
+        if (matches) {
+          issues.push({
+            type: "spelling",
+            title: `Possible spelling issue: ${matches[0]}`,
+            detail: `Consider changing it to "${replacement}".`,
+          });
+        }
+      });
+
+      grammarMap.forEach(rule => {
+        const matches = normalized.match(rule.pattern);
+        if (matches) {
+          issues.push({
+            type: "grammar",
+            title: `Grammar check: ${rule.label}`,
+            detail: `Suggested fix: "${rule.fix}".`,
+          });
+        }
+      });
+
+      const words = normalized.match(/\b[A-Za-z][A-Za-z'-]*\b/g) || [];
+      words.forEach(word => {
+        if (!/([a-z])\1{2,}/i.test(word)) return;
+        const suggestion = findClosestCommonWord(word);
+        issues.push({
+          type: "spelling",
+          title: `Possible typo with repeated letters: ${word}`,
+          detail: suggestion
+            ? `Did you mean "${suggestion}"?`
+            : "The word has repeated letters that look unusual. Please review it.",
+        });
+      });
+
+      const sentences = normalized.split(/(?<=[.!?])\s+/).filter(Boolean);
+      sentences.forEach((sentence, index) => {
+        const trimmed = sentence.trim();
+        if (!trimmed) return;
+        if (/^[a-z]/.test(trimmed)) {
+          issues.push({
+            type: "grammar",
+            title: `Sentence ${index + 1} may need capitalization`,
+            detail: `It starts with "${trimmed.slice(0, 12)}...".`,
+          });
+        }
+        if (!/[.!?]$/.test(trimmed) && index < sentences.length - 1) {
+          issues.push({
+            type: "grammar",
+            title: `Sentence ${index + 1} may be missing punctuation`,
+            detail: "Consider ending it with a period.",
+          });
+        }
+      });
+
+      if (!issues.length) {
+        issues.push({
+          type: "good",
+          title: "No obvious grammar or spelling issues found",
+          detail: "The draft looks clean based on the local checks.",
+        });
+      }
+
+      return issues;
+    }
+
+    function renderIssues(issues) {
+      el("issueList").innerHTML = issues.map(issue => `
+        <li class="issue ${issue.type === "good" ? "good" : ""}">
+          <strong>${escapeHtml(issue.title)}</strong>
+          <span>${escapeHtml(issue.detail)}</span>
+        </li>
+      `).join("");
+      const cleanCount = issues.filter(issue => issue.type !== "good").length;
+      el("checkField").textContent = cleanCount
+        ? `${cleanCount} issue${cleanCount === 1 ? "" : "s"} flagged by the local grammar and spelling check.`
+        : "No obvious grammar or spelling issues found by the local check.";
+    }
+
+    function refineDraft() {
+      const raw = cleanText(el("draftInput").value);
+      if (!raw) {
+        el("statusBox").textContent = "Paste a draft first, then refine it.";
+        return;
+      }
+
+      const tone = el("toneSelect").value;
+      const purpose = el("purposeSelect").value;
+      const recipient = cleanText(el("recipientName").value);
+      const sender = cleanText(el("senderName").value);
+
+      let refined = applyAutoCorrections(raw);
+      refined = professionalizeWording(refined, purpose);
+      refined = applyToneRewrites(refined, tone);
+      refined = buildProfessionalBody(refined, purpose);
+      refined = ensureGreeting(refined, tone, recipient);
+      refined = ensureClosing(refined, tone, sender);
+
+      const subject = buildSubject(raw, tone, purpose);
+      const issues = checkGrammarAndSpelling(refined);
+      el("subjectField").textContent = subject;
+      el("outputBox").textContent = refined;
+      el("changesField").textContent = `Tone set to ${tone}. Purpose set to ${purpose.replace(/_/g, " ")}. Grammar, spelling, repeated-letter typos, and awkward wording were auto-corrected before the final HR polish.`;
+      el("resultBadge").textContent = "Refined";
+      renderIssues(issues);
+      el("statusBox").textContent = "Draft refined. You can copy the polished version now.";
+    }
+
+    el("refineBtn").addEventListener("click", refineDraft);
+    el("checkBtn").addEventListener("click", () => {
+      const issues = checkGrammarAndSpelling(el("draftInput").value);
+      renderIssues(issues);
+      el("statusBox").textContent = "Grammar and spelling check complete.";
+      el("resultBadge").textContent = "Checked";
+    });
+
+    el("copyBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(el("outputBox").textContent);
+        el("statusBox").textContent = "Refined email copied.";
+      } catch {
+        const fallback = document.createElement("textarea");
+        fallback.value = el("outputBox").textContent;
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.appendChild(fallback);
+        fallback.select();
+        const copied = document.execCommand && document.execCommand("copy");
+        fallback.remove();
+        el("statusBox").textContent = copied ? "Refined email copied." : "Copy failed in this browser. Select the refined text manually.";
+      }
+    });
+
+    el("sampleBtn").addEventListener("click", () => {
+      el("recipientName").value = "Hiring Team";
+      el("senderName").value = "Alex";
+      el("toneSelect").value = "professional";
+      el("purposeSelect").value = "candidate_followup";
+      el("draftInput").value = "hey team - just wanted to follow up on the interview and see if you got a chance to review my resume latddder. let me know if you need anything else from me. thanks!";
+      el("statusBox").textContent = "Sample draft loaded. Click Refine Draft to polish it.";
+      el("resultBadge").textContent = "Draft";
+      renderIssues(checkGrammarAndSpelling(el("draftInput").value));
+    });
+
+    refineDraft();
+  </script>
+  <script src="../footer.js"></script>
+</body>
+</html>

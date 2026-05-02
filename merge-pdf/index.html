@@ -473,7 +473,7 @@
     </section>
   </main>
 
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="../vendor/pdf-lib.min.js"></script>
   <script>
     const fileInput = document.querySelector("#fileInput");
     const dropzone = document.querySelector("#dropzone");
@@ -490,6 +490,7 @@
     const previewBadge = document.querySelector("#previewBadge");
     let files = [];
     let mergedBlob = null;
+    let isMerging = false;
 
     function formatBytes(bytes) {
       if (!bytes) return "0 KB";
@@ -498,24 +499,49 @@
     }
 
     function safePdfPart(value) {
-      return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+      return String(value ?? "").replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function hasPdfLib() {
+      return Boolean(window.PDFLib && window.PDFLib.PDFDocument);
+    }
+
+    function canMergeRealFiles() {
+      return !files.some(item => item.error) && (hasPdfLib() || files.every(item => !item.file));
+    }
+
+    function refreshControls() {
+      const enoughFiles = files.length >= 2;
+      mergeBtn.disabled = isMerging || !enoughFiles || !canMergeRealFiles();
+      downloadBtn.disabled = isMerging || !mergedBlob;
+      if (files.some(item => item.file) && !hasPdfLib()) {
+        queueStatus.textContent = "Library loading";
+      } else {
+        queueStatus.textContent = enoughFiles ? "Ready to merge" : "Needs 2 files";
+      }
     }
 
     function render() {
       const total = files.reduce((sum, item) => sum + item.size, 0);
       fileCount.textContent = String(files.length);
       totalSize.textContent = formatBytes(total);
-      queueStatus.textContent = files.length >= 2 ? "Ready to merge" : "Needs 2 files";
-      mergeBtn.disabled = files.length < 2;
-      downloadBtn.disabled = !mergedBlob;
       previewBadge.textContent = mergedBlob ? "Merged PDF ready" : "Draft";
 
       queue.innerHTML = files.map((item, index) => `
         <article class="file-row">
           <span class="file-number">${index + 1}</span>
           <span>
-            <h3>${item.name}</h3>
-            <p>${formatBytes(item.size)} - ${item.pages} estimated page${item.pages === 1 ? "" : "s"}</p>
+            <h3>${escapeHtml(item.name)}</h3>
+            <p>${formatBytes(item.size)} - ${item.error ? escapeHtml(item.error) : item.pages ? `${item.pages} page${item.pages === 1 ? "" : "s"}` : "reading pages..."}</p>
           </span>
           <span class="row-actions">
             <button class="btn icon" type="button" data-action="up" data-index="${index}" ${index === 0 ? "disabled" : ""}>Up</button>
@@ -529,7 +555,7 @@
         <article class="sheet">
           <span class="sheet-order">${index + 1}</span>
           <span class="sheet-main">
-            <strong>${item.name}</strong>
+            <strong>${escapeHtml(item.name)}</strong>
             <span>${formatBytes(item.size)} - included in merged PDF</span>
           </span>
         </article>
@@ -541,33 +567,73 @@
           </div>
         </div>
       `;
+      refreshControls();
     }
 
-    function estimatePages(size) {
-      return Math.max(1, Math.ceil(size / 180000));
+    async function countPages(file) {
+      if (!hasPdfLib()) return null;
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFLib.PDFDocument.load(bytes, {
+        ignoreEncryption: true,
+        updateMetadata: false
+      });
+      return pdf.getPageCount();
     }
 
-    function addFiles(list) {
+    async function addFiles(list) {
       const next = Array.from(list).filter(file => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-      files = files.concat(next.map(file => ({
+      const existingKeys = new Set(files.map(item => `${item.name}:${item.size}:${item.lastModified || ""}`));
+      const unique = next.filter(file => {
+        const key = `${file.name}:${file.size}:${file.lastModified || ""}`;
+        if (existingKeys.has(key)) return false;
+        existingKeys.add(key);
+        return true;
+      });
+      files = files.concat(unique.map(file => ({
         id: crypto.randomUUID ? crypto.randomUUID() : `${file.name}-${Date.now()}-${Math.random()}`,
         file,
         name: file.name,
         size: file.size,
-        pages: estimatePages(file.size)
+        pages: null,
+        lastModified: file.lastModified || ""
       })));
       mergedBlob = null;
-      statusText.textContent = next.length ? `${next.length} PDF file${next.length === 1 ? "" : "s"} added to the merge queue.` : "Only PDF files can be added.";
+      statusText.textContent = unique.length
+        ? `${unique.length} PDF file${unique.length === 1 ? "" : "s"} added to the merge queue.`
+        : "Only new PDF files can be added.";
       progressBar.style.width = "0%";
+      render();
+      if (!unique.length) return;
+      if (!hasPdfLib()) {
+        statusText.textContent = "PDF merge library is still loading. Wait a moment, then merge again.";
+        render();
+        return;
+      }
+      for (const item of files.filter(entry => entry.file && !entry.pages)) {
+        try {
+          item.pages = await countPages(item.file);
+        } catch (error) {
+          item.pages = 0;
+          item.error = "Cannot read pages";
+          statusText.textContent = `${item.name} could not be read. It may be encrypted, damaged, or password protected.`;
+        }
+      }
       render();
     }
 
     async function createMergedPdf() {
-      if (window.PDFLib && files.every(item => item.file)) {
+      if (files.some(item => item.file) && !hasPdfLib()) {
+        throw new Error("PDF merge library is unavailable. Check your internet connection and reload this page.");
+      }
+
+      if (hasPdfLib() && files.every(item => item.file)) {
         const mergedPdf = await PDFLib.PDFDocument.create();
         for (const item of files) {
           const bytes = await item.file.arrayBuffer();
-          const sourcePdf = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          const sourcePdf = await PDFLib.PDFDocument.load(bytes, {
+            ignoreEncryption: true,
+            updateMetadata: false
+          });
           const pages = await mergedPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
           pages.forEach(page => mergedPdf.addPage(page));
         }
@@ -635,8 +701,16 @@
     }
 
     function runMerge() {
-      mergeBtn.disabled = true;
-      downloadBtn.disabled = true;
+      if (files.length < 2) {
+        statusText.textContent = "Add at least two PDFs before merging.";
+        return;
+      }
+      if (!canMergeRealFiles()) {
+        statusText.textContent = "PDF merge library is still loading. Reload the page if this does not clear.";
+        return;
+      }
+      isMerging = true;
+      refreshControls();
       previewBadge.textContent = "Merging";
       const steps = [["Reading file order", 22], ["Preparing page stack", 48], ["Combining PDF pages", 78], ["Packaging merged PDF", 100]];
       let index = 0;
@@ -652,18 +726,18 @@
         }
         try {
           mergedBlob = await createMergedPdf();
-          const usedRealMerge = window.PDFLib && files.every(item => item.file);
+          const usedRealMerge = hasPdfLib() && files.every(item => item.file);
           statusText.textContent = usedRealMerge
             ? `Merge complete. ${files.length} PDF files were combined into one download.`
             : "Sample merge complete. Add real PDF files to combine their original pages.";
           previewBadge.textContent = "Merged PDF ready";
-          mergeBtn.disabled = false;
-          downloadBtn.disabled = false;
+          isMerging = false;
           render();
         } catch (error) {
-          statusText.textContent = "This PDF could not be merged in the browser. Try an unlocked PDF file.";
+          statusText.textContent = error.message || "This PDF could not be merged in the browser. Try an unlocked PDF file.";
           previewBadge.textContent = "Merge failed";
-          mergeBtn.disabled = false;
+          isMerging = false;
+          refreshControls();
         }
       };
       setTimeout(run, 160);
@@ -722,8 +796,11 @@
       const link = document.createElement("a");
       link.href = URL.createObjectURL(mergedBlob);
       link.download = "merged-hr-documents.pdf";
+      document.body.appendChild(link);
       link.click();
-      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      const objectUrl = link.href;
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
     });
 
     clearBtn.addEventListener("click", () => {
