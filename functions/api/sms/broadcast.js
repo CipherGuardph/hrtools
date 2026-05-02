@@ -24,6 +24,7 @@ export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
     const message = String(body?.message || "").trim();
+    const senderId = String(body?.senderId || context.env.PHILSMS_SENDER_ID || "").trim();
     const rawRecipients = Array.isArray(body?.recipients) ? body.recipients : [];
     const recipients = rawRecipients
       .map(normalizeRecipient)
@@ -40,7 +41,6 @@ export async function onRequestPost(context) {
     }
 
     const apiToken = context.env.PHILSMS_API_TOKEN;
-    const senderId = context.env.PHILSMS_SENDER_ID;
     const baseUrl = String(context.env.PHILSMS_BASE_URL || "https://app.philsms.com/api/v3").replace(/\/$/, "");
 
     if (!apiToken) {
@@ -48,7 +48,7 @@ export async function onRequestPost(context) {
     }
 
     if (!senderId) {
-      return json({ status: "error", message: "Missing Cloudflare variable: PHILSMS_SENDER_ID." }, 500);
+      return json({ status: "error", message: "Missing sender ID. Provide senderId in the request or set PHILSMS_SENDER_ID in Cloudflare." }, 500);
     }
 
     const upstream = await fetch(`${baseUrl}/sms/send`, {

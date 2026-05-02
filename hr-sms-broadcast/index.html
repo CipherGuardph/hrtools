@@ -311,6 +311,9 @@
       </div>
 
       <div class="form-grid">
+        <label>Sender ID
+          <input id="senderInput" type="text" maxlength="11" placeholder="Your sender name" value="HRTools">
+        </label>
         <label class="wide">Message
           <textarea id="messageInput" placeholder="Type the SMS message here.">Hi! You have an interview today!</textarea>
         </label>
@@ -346,6 +349,7 @@
     (function () {
       const messageInput = document.getElementById("messageInput");
       const numbersInput = document.getElementById("numbersInput");
+      const senderInput = document.getElementById("senderInput");
       const countLabel = document.getElementById("countLabel");
       const payloadPreview = document.getElementById("payloadPreview");
       const statusText = document.getElementById("statusText");
@@ -362,6 +366,7 @@
 
       function buildPayload() {
         return {
+          senderId: senderInput.value.trim(),
           message: messageInput.value.trim(),
           recipients: parseNumbers(numbersInput.value),
         };
@@ -382,6 +387,10 @@
         }
         if (!payload.message) {
           statusText.textContent = "Add a message first.";
+          return;
+        }
+        if (!payload.senderId) {
+          statusText.textContent = "Add a sender ID first.";
           return;
         }
         if (!apiEndpoint) {
