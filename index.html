@@ -104,6 +104,22 @@
       filter: saturate(1.04);
     }
 
+    .button.disabled {
+      background: #d9dfd9;
+      border-color: #c8d0ca;
+      color: #6d766f;
+      box-shadow: none;
+      cursor: not-allowed;
+      pointer-events: none;
+      filter: none;
+    }
+
+    .button.disabled:hover {
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 860px);
@@ -148,12 +164,100 @@
       margin-top: 30px;
     }
 
+    .projects {
+      margin-top: 42px;
+      text-align: left;
+      display: grid;
+      gap: 14px;
+    }
+
+    .projects h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .project-card {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 52px rgba(30, 44, 35, 0.18);
+    }
+
+    .project-card strong {
+      font-size: 1.08rem;
+    }
+
+    .project-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .project-card a {
+      color: var(--teal);
+      font-weight: 900;
+    }
+
+    .contact-section {
+      margin-top: 42px;
+      display: grid;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .contact-section h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .contact-copy {
+      margin: 0 auto;
+      max-width: 720px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .social-button {
+      background: #1877f2;
+      border-color: #1877f2;
+      color: #fff;
+    }
+
+    .social-button:hover {
+      box-shadow: 0 14px 28px rgba(24, 119, 242, 0.26);
+    }
+
     .footer {
       padding: 0 18px 28px;
       text-align: center;
       color: var(--muted);
       font-size: 0.95rem;
       font-weight: 700;
+    }
+
+    .version-line {
+      padding: 0 18px 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
     }
 
     @media (max-width: 960px) {
@@ -174,6 +278,10 @@
 
       .button {
         width: 100%;
+      }
+
+      .project-grid {
+        grid-template-columns: 1fr;
       }
 
     }
@@ -200,13 +308,36 @@
           <a class="button" href="./email-to-hr/index.html">Email to HR</a>
           <a class="button" href="./hr-sms-broadcast/index.html">HR SMS Broadcast</a>
           <a class="button" href="https://bpo-interview.cipherguardph.com/" target="_blank" rel="noopener noreferrer">BPO interview simulator</a>
-          <a class="button" href="./applicant-intake/index.html">Instant Applicant Analyzer - Under Construction</a>
+          <span class="button disabled" aria-disabled="true">Instant Applicant Analyzer - Under Construction</span>
         </div>
+
+        <section class="projects" aria-label="Other projects">
+          <h2>You may check my other projects too!</h2>
+          <div class="project-grid">
+            <article class="project-card">
+              <strong><a href="https://www.pixavent.com" target="_blank" rel="noopener noreferrer">pixavent.com</a></strong>
+              <p>Pix + Event Made Simple<br>The easiest way to collect event photos and videos from your guests. Just scan, tap, and upload.</p>
+            </article>
+            <article class="project-card">
+              <strong><a href="https://www.eternaltributeph.com" target="_blank" rel="noopener noreferrer">eternaltributeph.com</a></strong>
+              <p>A tribute and memorial-focused project designed to help families honor loved ones with dignity, warmth, and care.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="contact-section" aria-label="Custom work contact">
+          <h2>Need a custom page, automation, CRM, SaaS, or simple business website?</h2>
+          <p class="contact-copy">If you want a custom page built, automation, CRM, SaaS, or a simple page for your business, you may reach me on my Facebook page.</p>
+          <div class="actions">
+            <a class="button social-button" href="https://www.facebook.com/cjquintophdotcom/" target="_blank" rel="noopener noreferrer">Facebook Page</a>
+          </div>
+        </section>
       </section>
 
     </main>
 
     <footer class="footer" data-global-footer></footer>
+    <div class="version-line">V1.0</div>
   </div>
   <script src="./footer.js"></script>
 </body>
