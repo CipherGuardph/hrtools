@@ -512,13 +512,12 @@
         try {
           await state.firebaseInitPromise;
         } catch (error) {
-          setStatus(`Firebase connect failed: ${error.message}`);
-          return;
+          state.liveConfigured = false;
+          state.firebaseInitPromise = null;
+          state.services = null;
+          state.mode = "demo";
+          setStatus(`Firebase connect failed: ${error.message}. Saving locally instead.`);
         }
-      }
-      if (state.liveConfigured && !(state.mode === "firebase" && state.services)) {
-        setStatus("Live backend is not ready. Please wait for Firebase to connect.");
-        return;
       }
       const extracted = state.extracted || {};
       const analysis = analyzeAgainstJob(extracted);
@@ -592,6 +591,10 @@
         state.mode = "firebase";
         setStatus("Live upload is connected. Resume files and applicant records will save to the shared system.");
       } catch (error) {
+        state.liveConfigured = false;
+        state.firebaseInitPromise = null;
+        state.services = null;
+        state.mode = "demo";
         setStatus(`Firebase connect failed: ${error.message}`);
       } finally {
         state.firebaseInitPromise = null;
@@ -608,5 +611,6 @@
     loadJob();
     connectIfConfigured();
   </script>
+  <script src="../../footer.js"></script>
 </body>
 </html>

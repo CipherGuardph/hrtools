@@ -396,11 +396,11 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/">
+    <a class="brand" href="../index.html">
       <span class="mark">MG</span>
       <span>HR Tools PDF</span>
     </a>
-    <a class="back" href="/">Back Home</a>
+    <a class="back" href="../index.html">Back Home</a>
   </header>
 
   <section class="hero">
@@ -515,7 +515,7 @@
           <span class="file-number">${index + 1}</span>
           <span>
             <h3>${item.name}</h3>
-            <p>${formatBytes(item.size)} · ${item.pages} estimated page${item.pages === 1 ? "" : "s"}</p>
+            <p>${formatBytes(item.size)} - ${item.pages} estimated page${item.pages === 1 ? "" : "s"}</p>
           </span>
           <span class="row-actions">
             <button class="btn icon" type="button" data-action="up" data-index="${index}" ${index === 0 ? "disabled" : ""}>Up</button>
@@ -530,7 +530,7 @@
           <span class="sheet-order">${index + 1}</span>
           <span class="sheet-main">
             <strong>${item.name}</strong>
-            <span>${formatBytes(item.size)} · included in merged PDF</span>
+            <span>${formatBytes(item.size)} - included in merged PDF</span>
           </span>
         </article>
       `).join("") : `
@@ -595,7 +595,7 @@
             `(${safePdfPart(item.name)}) Tj`,
             "0 -24 Td",
             "/F1 11 Tf",
-            `(${safePdfPart(`Source ${fileIndex + 1} of ${files.length} · estimated page ${page} of ${item.pages}`)}) Tj`,
+            `(${safePdfPart(`Source ${fileIndex + 1} of ${files.length} - estimated page ${page} of ${item.pages}`)}) Tj`,
             "0 -24 Td",
             `(${safePdfPart(`Combined page ${pageCounter} of ${totalPages}`)}) Tj`,
             "0 -40 Td",
@@ -723,7 +723,7 @@
       link.href = URL.createObjectURL(mergedBlob);
       link.download = "merged-hr-documents.pdf";
       link.click();
-      URL.revokeObjectURL(link.href);
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     });
 
     clearBtn.addEventListener("click", () => {
@@ -736,5 +736,6 @@
 
     render();
   </script>
+  <script src="../footer.js"></script>
 </body>
 </html>

@@ -372,120 +372,130 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/">
+    <a class="brand" href="../index.html">
       <span class="mark">PDF</span>
       <span>HR Tools Converter</span>
     </a>
-    <a class="back" href="/">Back Home</a>
+    <a class="back" href="../index.html">Back Home</a>
   </header>
 
-  <section class="hero">
-    <div>
-      <h1 id="pageTitle">PDF to Word Converter</h1>
-      <p class="lead" id="pageLead">Upload a PDF, extract readable document text, preview the Word layout, then download a Word-compatible document.</p>
-    </div>
-    <span class="route-pill">/word-to-pdf-convert</span>
-  </section>
-
-  <main class="workspace">
-    <section class="panel" aria-label="Conversion controls">
-      <div class="panel-head">
-        <h2 id="inputTitle">PDF Input</h2>
-        <button class="btn" type="button" id="sampleBtn">Use Sample</button>
+  <div class="app-shell" id="appShell">
+    <section class="hero">
+      <div>
+        <h1 id="pageTitle">PDF to Word Converter</h1>
+        <p class="lead" id="pageLead">Upload a PDF, extract readable document text page by page, preview the Word layout, then download a Word-compatible document.</p>
       </div>
-
-      <div class="mode" aria-label="Converter mode">
-        <button class="active" type="button" id="pdfToWordBtn">PDF to Word</button>
-        <button type="button" id="wordToPdfBtn">Reverse: Word to PDF</button>
-      </div>
-
-      <label class="dropzone" id="dropzone">
-        <input id="fileInput" type="file" accept=".pdf,.txt,.md,.html,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/html">
-        <span>
-          <strong id="dropTitle">Drop a PDF file here</strong>
-          <span id="dropHint">or click to choose a PDF file</span>
-        </span>
-      </label>
-
-      <div class="file-info" aria-label="File details">
-        <div class="info">
-          <span>File</span>
-          <strong id="fileName">No file selected</strong>
-        </div>
-        <div class="info">
-          <span>Size</span>
-          <strong id="fileSize">0 KB</strong>
-        </div>
-        <div class="info">
-          <span>Status</span>
-          <strong id="fileStatus">Ready</strong>
-        </div>
-      </div>
-
-      <label class="field">
-        Document title
-        <input id="docTitle" type="text" value="Converted HR Document">
-      </label>
-
-      <label class="field">
-        <span id="contentLabel">Extracted PDF text</span>
-        <textarea id="docText">Upload a PDF to extract text, or use the sample to preview a PDF to Word conversion.</textarea>
-      </label>
-
-      <div class="options">
-        <label class="field">
-          Word format
-          <select id="wordFormat">
-            <option value="doc">Microsoft Word .doc</option>
-            <option value="html">Word-compatible HTML</option>
-          </select>
-        </label>
-        <label class="field">
-          Export style
-          <select id="exportStyle">
-            <option value="standard">Standard HR document</option>
-            <option value="memo">Memo</option>
-            <option value="report">Report</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="button-row">
-        <button class="btn primary" id="convertBtn" type="button">Convert to Word</button>
-        <button class="btn" id="downloadBtn" type="button" disabled>Download Word</button>
-        <button class="btn" id="printBtn" type="button">Print Preview</button>
-      </div>
-
-      <div class="status-card" aria-live="polite">
-        <span id="statusText">Ready to convert your PDF into a Word document.</span>
-        <div class="progress"><span id="progressBar"></span></div>
-      </div>
+      <span class="route-pill">/word-to-pdf-convert</span>
     </section>
 
-    <section class="preview" aria-label="Document preview">
-      <div class="preview-head">
-        <h2 id="previewHeading">Word Preview</h2>
-        <span id="previewBadge" class="badge">Draft</span>
-      </div>
-      <div class="preview-shell">
-        <article class="paper" id="paper">
-          <h3 id="previewTitle">Converted HR Document</h3>
-          <div class="paper-meta">
-            <span id="previewDate">Generated today</span>
-            <span id="previewStyle">Standard HR document</span>
+    <main class="workspace">
+      <section class="panel" aria-label="Conversion controls">
+        <div class="panel-head">
+          <h2 id="inputTitle">PDF Input</h2>
+          <button class="btn" type="button" id="sampleBtn">Use Sample</button>
+        </div>
+
+        <div class="mode" aria-label="Converter mode">
+          <button class="active" type="button" id="pdfToWordBtn">PDF to Word</button>
+          <button type="button" id="wordToPdfBtn">Reverse: Word to PDF</button>
+        </div>
+
+        <label class="dropzone" id="dropzone">
+          <input id="fileInput" type="file" accept=".pdf,.txt,.md,.html,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/html">
+          <span>
+            <strong id="dropTitle">Drop a PDF file here</strong>
+            <span id="dropHint">or click to choose a PDF file</span>
+          </span>
+        </label>
+
+        <div class="file-info" aria-label="File details">
+          <div class="info">
+            <span>File</span>
+            <strong id="fileName">No file selected</strong>
           </div>
-          <div class="paper-body" id="previewText"></div>
-        </article>
-      </div>
-    </section>
-  </main>
+          <div class="info">
+            <span>Size</span>
+            <strong id="fileSize">0 KB</strong>
+          </div>
+          <div class="info">
+            <span>Status</span>
+            <strong id="fileStatus">Ready</strong>
+          </div>
+          <div class="info">
+            <span>Pages</span>
+            <strong id="pageCount">0</strong>
+          </div>
+        </div>
 
+        <label class="field">
+          Document title
+          <input id="docTitle" type="text" value="Converted HR Document">
+        </label>
+
+        <label class="field">
+          <span id="contentLabel">Extracted PDF text</span>
+          <textarea id="docText">Upload a PDF to extract text, or use the sample to preview a PDF to Word conversion.</textarea>
+        </label>
+
+        <div class="options">
+          <label class="field">
+            Word format
+            <select id="wordFormat">
+              <option value="doc">Microsoft Word .doc</option>
+              <option value="html">Word-compatible HTML</option>
+            </select>
+          </label>
+          <label class="field">
+            Export style
+            <select id="exportStyle">
+              <option value="standard">Standard HR document</option>
+              <option value="memo">Memo</option>
+              <option value="report">Report</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button class="btn primary" id="convertBtn" type="button">Convert to Word</button>
+          <button class="btn" id="downloadBtn" type="button" disabled>Download Word</button>
+          <button class="btn" id="printBtn" type="button">Print Preview</button>
+        </div>
+
+        <div class="status-card" aria-live="polite">
+          <span id="statusText">Ready to convert your PDF into a Word document.</span>
+          <div class="progress"><span id="progressBar"></span></div>
+        </div>
+      </section>
+
+      <section class="preview" aria-label="Document preview">
+        <div class="preview-head">
+          <h2 id="previewHeading">Word Preview</h2>
+          <span id="previewBadge" class="badge">Draft</span>
+        </div>
+        <div class="preview-shell">
+          <article class="paper" id="paper">
+            <h3 id="previewTitle">Converted HR Document</h3>
+            <div class="paper-meta">
+              <span id="previewDate">Generated today</span>
+              <span id="previewStyle">Standard HR document</span>
+            </div>
+            <div class="paper-body" id="previewText"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js"></script>
   <script>
+    const appShell = document.querySelector("#appShell");
     const fileInput = document.querySelector("#fileInput");
     const dropzone = document.querySelector("#dropzone");
     const fileName = document.querySelector("#fileName");
     const fileSize = document.querySelector("#fileSize");
     const fileStatus = document.querySelector("#fileStatus");
+    const pageCount = document.querySelector("#pageCount");
     const docTitle = document.querySelector("#docTitle");
     const docText = document.querySelector("#docText");
     const wordFormat = document.querySelector("#wordFormat");
@@ -505,6 +515,8 @@
     let outputBlob = null;
     let outputExtension = "doc";
     let outputMime = "application/msword";
+    let selectedFile = null;
+    let selectedPageCount = 0;
 
     function formatBytes(bytes) {
       if (!bytes) return "0 KB";
@@ -516,43 +528,36 @@
       return (value.trim() || "converted-document").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "converted-document";
     }
 
-    function decodePdfLiteral(value) {
-      return value
-        .replace(/\\n/g, "\n")
-        .replace(/\\r/g, "\n")
-        .replace(/\\t/g, " ")
-        .replace(/\\\(/g, "(")
-        .replace(/\\\)/g, ")")
-        .replace(/\\\\/g, "\\");
+    async function extractPdfTextFromFile(file) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.js";
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      selectedPageCount = pdf.numPages;
+      pageCount.textContent = String(selectedPageCount);
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        setProgress(`Extracting page ${pageNumber} of ${pdf.numPages}`, Math.min(88, Math.round((pageNumber / pdf.numPages) * 88)));
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const parts = [];
+        for (const item of content.items) {
+          parts.push(item.str || "");
+          if (item.hasEOL) {
+            parts.push("\n");
+          } else {
+            parts.push(" ");
+          }
+        }
+        const text = parts.join("").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+        pages.push(`Page ${pageNumber}\n${text || "[No readable text found on this page]"}`);
+      }
+      return pages.join("\n\n");
     }
 
-    function extractPdfText(raw) {
-      const chunks = [];
-      const literalMatches = raw.matchAll(/\((?:\\.|[^\\)])*\)\s*Tj/g);
-      for (const match of literalMatches) {
-        chunks.push(decodePdfLiteral(match[0].replace(/\)\s*Tj$/, "").slice(1)));
-      }
-      const arrayMatches = raw.matchAll(/\[((?:\s*\((?:\\.|[^\\)])*\)\s*-?\d*)+)\]\s*TJ/g);
-      for (const match of arrayMatches) {
-        const parts = [...match[1].matchAll(/\((?:\\.|[^\\)])*\)/g)].map(part => decodePdfLiteral(part[0].slice(1, -1)));
-        if (parts.join("").trim()) chunks.push(parts.join(""));
-      }
-      const hexMatches = raw.matchAll(/<([0-9A-Fa-f\s]{4,})>\s*Tj/g);
-      for (const match of hexMatches) {
-        const hex = match[1].replace(/\s+/g, "");
-        let value = "";
-        for (let index = 0; index < hex.length; index += 2) {
-          const code = parseInt(hex.slice(index, index + 2), 16);
-          if (code >= 32 && code <= 126) value += String.fromCharCode(code);
-        }
-        if (value.trim()) chunks.push(value);
-      }
-      const text = chunks.join("\n").replace(/[^\S\r\n]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
-      return text || `PDF text extraction needs review.
-
-This file was loaded successfully, but the browser demo could not extract embedded text from it. Some PDFs store text as scanned images or encoded font streams.
-
-Paste the visible PDF text here, then click Convert to Word to generate a Word-compatible document.`;
+    async function extractDocxText(file) {
+      const buffer = await file.arrayBuffer();
+      const result = await window.mammoth.extractRawText({ arrayBuffer: buffer });
+      return result.value.trim();
     }
 
     function htmlEscape(value) {
@@ -683,6 +688,12 @@ Paste the visible PDF text here, then click Convert to Word to generate a Word-c
       previewBadge.textContent = "Draft";
     }
 
+    function resetSelectedFileDetails() {
+      selectedFile = null;
+      selectedPageCount = 0;
+      pageCount.textContent = "0";
+    }
+
     function setMode(nextMode) {
       mode = nextMode;
       const isPdfToWord = mode === "pdfToWord";
@@ -704,6 +715,7 @@ Paste the visible PDF text here, then click Convert to Word to generate a Word-c
       fileInput.value = "";
       fileName.textContent = "No file selected";
       fileSize.textContent = "0 KB";
+      resetSelectedFileDetails();
       if (isPdfToWord) {
         docTitle.value = "Converted HR Document";
         docText.value = "Upload a PDF to extract text, or use the sample to preview a PDF to Word conversion.";
@@ -719,21 +731,39 @@ Prepared by HR Tools.`;
       updatePreview();
     }
 
-    function readFile(file) {
+    function setProgress(label, value) {
+      statusText.textContent = label;
+      progressBar.style.width = `${value}%`;
+    }
+
+    async function readFile(file) {
+      selectedFile = file;
       fileName.textContent = file.name;
       fileSize.textContent = formatBytes(file.size);
       const extension = file.name.split(".").pop().toLowerCase();
       docTitle.value = file.name.replace(/\.[^.]+$/, "");
       if (mode === "pdfToWord") {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const raw = String(reader.result || "");
-          docText.value = extractPdfText(raw);
+        try {
+          fileStatus.textContent = "Reading PDF";
+          setProgress("Opening PDF file...", 14);
+          const extractedText = await extractPdfTextFromFile(file);
+          docText.value = extractedText || `No readable text was found in this PDF.
+
+If this is a scanned file, OCR support would be the next step.`;
           fileStatus.textContent = "PDF text extracted";
-          statusText.textContent = "PDF loaded. Review the extracted text, then convert to Word.";
+          setProgress(selectedPageCount >= 5
+            ? `PDF loaded. ${selectedPageCount} pages extracted successfully.`
+            : "PDF loaded. Review the extracted text, then convert to Word.", 100);
           updatePreview();
-        };
-        reader.readAsText(file);
+        } catch (error) {
+          fileStatus.textContent = "PDF read failed";
+          pageCount.textContent = "0";
+          docText.value = `The PDF could not be read in the browser.
+
+Reason: ${error.message}`;
+          setProgress(`PDF read failed: ${error.message}`, 100);
+          updatePreview();
+        }
         return;
       }
       if (["txt", "md", "html"].includes(extension)) {
@@ -742,12 +772,31 @@ Prepared by HR Tools.`;
           const raw = String(reader.result || "");
           docText.value = extension === "html" ? raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : raw;
           fileStatus.textContent = "Text extracted";
+          pageCount.textContent = "Ready";
           statusText.textContent = "Word content loaded. Review the preview, then convert to PDF.";
           updatePreview();
         };
         reader.readAsText(file);
+      } else if (extension === "docx") {
+        try {
+          fileStatus.textContent = "Reading DOCX";
+          setProgress("Extracting DOCX text...", 48);
+          docText.value = await extractDocxText(file) || "This DOCX file did not contain readable text.";
+          fileStatus.textContent = "DOCX text extracted";
+          pageCount.textContent = "Ready";
+          setProgress("DOCX loaded. Review the preview, then convert to PDF.", 100);
+          updatePreview();
+        } catch (error) {
+          fileStatus.textContent = "DOCX read failed";
+          docText.value = `The DOCX file could not be read.
+
+Reason: ${error.message}`;
+          setProgress(`DOCX read failed: ${error.message}`, 100);
+          updatePreview();
+        }
       } else {
         fileStatus.textContent = "Word file staged";
+        pageCount.textContent = "Manual";
         docText.value = `${file.name}
 
 This Word document has been staged for PDF export.
@@ -774,6 +823,8 @@ Prepared by HR Tools.`;
         fileName.textContent = "benefits-enrollment-guide.pdf";
         fileSize.textContent = "86 KB";
         fileStatus.textContent = "Sample extracted";
+        pageCount.textContent = "5";
+        selectedPageCount = 5;
         statusText.textContent = "Sample PDF text extracted. Convert it to a Word document when ready.";
       } else {
         docTitle.value = "New Hire Checklist";
@@ -792,6 +843,7 @@ Checklist:
         fileName.textContent = "new-hire-checklist.docx";
         fileSize.textContent = "48 KB";
         fileStatus.textContent = "Sample loaded";
+        pageCount.textContent = "Ready";
         statusText.textContent = "Sample Word document loaded. Reverse convert it when ready.";
       }
       updatePreview();
@@ -828,7 +880,9 @@ Checklist:
 
     fileInput.addEventListener("change", event => {
       const file = event.target.files[0];
-      if (file) readFile(file);
+      if (file) {
+        readFile(file);
+      }
     });
 
     dropzone.addEventListener("dragover", event => {
@@ -844,7 +898,9 @@ Checklist:
       event.preventDefault();
       dropzone.style.borderColor = "#b7c7bb";
       const file = event.dataTransfer.files[0];
-      if (file) readFile(file);
+      if (file) {
+        readFile(file);
+      }
     });
 
     document.querySelector("#sampleBtn").addEventListener("click", useSample);
@@ -871,5 +927,6 @@ Checklist:
 
     updatePreview();
   </script>
+  <script src="../footer.js"></script>
 </body>
 </html>

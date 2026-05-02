@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OCR Extractor</title>
+  <title>Image to Text</title>
   <style>
     :root {
       --ink: #17211b;
@@ -344,23 +344,23 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/">
-      <span class="mark">OCR</span>
-      <span>HR Tools OCR</span>
+    <a class="brand" href="../index.html">
+      <span class="mark">IT</span>
+      <span>HR Tools Image to Text</span>
     </a>
-    <a class="back" href="/">Back Home</a>
+    <a class="back" href="../index.html">Back Home</a>
   </header>
 
   <section class="hero">
     <div>
-      <h1>OCR Extractor</h1>
+      <h1>Image to Text</h1>
       <p class="lead">Extract text from scanned PDFs or images, then identify useful candidate details like name, email, phone, role, skills, and summary.</p>
     </div>
-    <span class="route-pill">/ocr-extract</span>
+    <span class="route-pill">/image-to-text</span>
   </section>
 
   <main class="workspace">
-    <section class="panel" aria-label="OCR controls">
+    <section class="panel" aria-label="Image to text controls">
       <div class="panel-head">
         <h2>Scanned PDF or Image</h2>
         <button class="btn" type="button" id="sampleBtn">Use Sample</button>
@@ -395,11 +395,11 @@
 
       <label>
         <strong>Extracted text</strong>
-        <textarea id="textOutput">Upload a scanned PDF or image, then run OCR. You can also paste text here and run AI extraction.</textarea>
+        <textarea id="textOutput">Upload a scanned PDF or image, then run image-to-text. You can also paste text here and run AI extraction.</textarea>
       </label>
 
       <div class="button-row">
-        <button class="btn primary" type="button" id="ocrBtn">Run OCR</button>
+        <button class="btn primary" type="button" id="ocrBtn">Run Image to Text</button>
         <button class="btn" type="button" id="aiBtn">AI Extract Fields</button>
         <button class="btn" type="button" id="copyBtn">Copy Text</button>
       </div>
@@ -452,7 +452,7 @@
 
         <div>
           <h2>Summary</h2>
-          <div class="summary" id="summaryField">Run AI extraction after OCR to generate a structured profile summary.</div>
+          <div class="summary" id="summaryField">Run AI extraction after image-to-text to generate a structured profile summary.</div>
         </div>
       </div>
     </section>
@@ -473,6 +473,7 @@
     const resultBadge = document.querySelector("#resultBadge");
     let selectedFile = null;
     let selectedImageUrl = "";
+    let selectedPdfPageUrls = [];
 
     const skillBank = [
       "JavaScript", "TypeScript", "React", "Node", "Python", "SQL", "Excel", "Payroll", "Recruiting",
@@ -492,37 +493,50 @@
       progressBar.style.width = `${value}%`;
     }
 
+    function revokeBlobUrl(value) {
+      if (value && value.startsWith("blob:")) {
+        URL.revokeObjectURL(value);
+      }
+    }
+
     function renderImagePreview(src) {
       preview.innerHTML = "";
       const img = document.createElement("img");
       img.src = src;
-      img.alt = "OCR source preview";
+      img.alt = "Image to text source preview";
       preview.appendChild(img);
     }
 
-    async function renderPdfFirstPage(file) {
+    async function renderPdfPageImages(file) {
       if (!window.pdfjsLib) {
-        preview.innerHTML = '<div class="preview-empty">PDF preview library is loading. OCR can still use pasted text or sample data.</div>';
-        return "";
+        preview.innerHTML = '<div class="preview-empty">PDF preview library is loading. Image to text can still use pasted text or sample data.</div>';
+        return [];
       }
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
       const buffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-      const page = await pdf.getPage(1);
-      const viewport = page.getViewport({ scale: 1.6 });
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({ canvasContext: context, viewport }).promise;
-      const url = canvas.toDataURL("image/png");
-      renderImagePreview(url);
-      return url;
+      const urls = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1.6 });
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: context, viewport }).promise;
+        urls.push(canvas.toDataURL("image/png"));
+      }
+      if (urls[0]) {
+        renderImagePreview(urls[0]);
+      }
+      return urls;
     }
 
     async function loadFile(file) {
+      revokeBlobUrl(selectedImageUrl);
       selectedFile = file;
       selectedImageUrl = "";
+      selectedPdfPageUrls = [];
       fileName.textContent = file.name;
       fileType.textContent = formatType(file);
       fileStatus.textContent = "Loaded";
@@ -530,13 +544,18 @@
       resultBadge.textContent = "Draft";
       if (file.type.startsWith("image/")) {
         selectedImageUrl = URL.createObjectURL(file);
+        selectedPdfPageUrls = [selectedImageUrl];
         renderImagePreview(selectedImageUrl);
-        statusText.textContent = "Image loaded. Run OCR to extract text.";
+        statusText.textContent = "Image loaded. Run image-to-text to extract text.";
       } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-        statusText.textContent = "PDF loaded. Rendering first scanned page for OCR.";
+        statusText.textContent = "PDF loaded. Rendering the scanned pages for image-to-text.";
         try {
-          selectedImageUrl = await renderPdfFirstPage(file);
-          statusText.textContent = "PDF first page rendered. Run OCR to extract text.";
+          selectedPdfPageUrls = await renderPdfPageImages(file);
+          selectedImageUrl = selectedPdfPageUrls[0] || "";
+          fileStatus.textContent = "PDF preview ready";
+          statusText.textContent = selectedPdfPageUrls.length
+            ? `PDF preview ready. ${selectedPdfPageUrls.length} page${selectedPdfPageUrls.length === 1 ? "" : "s"} ready for image-to-text.`
+            : "PDF loaded. Run image-to-text to extract text.";
         } catch (error) {
           preview.innerHTML = '<div class="preview-empty">Could not render this PDF locally. Try an image scan or paste text manually.</div>';
           statusText.textContent = "PDF loaded, but preview rendering failed.";
@@ -544,35 +563,47 @@
       }
     }
 
+    async function ocrSource(source, pageLabel) {
+      return Tesseract.recognize(source, "eng", {
+        logger: message => {
+          if (message.status === "recognizing text") {
+            const pageProgress = Math.round((message.progress || 0) * 72);
+            setProgress(`Recognizing ${pageLabel}`, Math.min(96, pageProgress + 20));
+          }
+        }
+      });
+    }
+
     async function runOcr() {
       if (!selectedFile && !selectedImageUrl) {
-        statusText.textContent = "Choose a scanned PDF or image first, or use the sample.";
-        return;
-      }
-      setProgress("Preparing OCR", 12);
-      if (window.Tesseract && selectedImageUrl) {
+      statusText.textContent = "Choose a scanned PDF or image first, or use the sample.";
+      return;
+    }
+      setProgress("Preparing image-to-text", 12);
+      if (window.Tesseract && (selectedPdfPageUrls.length || selectedImageUrl)) {
         try {
-          const result = await Tesseract.recognize(selectedImageUrl, "eng", {
-            logger: message => {
-              if (message.status === "recognizing text") {
-                setProgress("Recognizing text", Math.round((message.progress || 0) * 80) + 15);
-              }
-            }
-          });
-          textOutput.value = result.data.text.trim() || "OCR completed, but no readable text was found.";
-          fileStatus.textContent = "OCR complete";
-          setProgress("OCR complete. Run AI extraction next.", 100);
+          const sources = selectedPdfPageUrls.length ? selectedPdfPageUrls : [selectedImageUrl];
+          const pages = [];
+          for (let index = 0; index < sources.length; index += 1) {
+            const pageLabel = sources.length > 1 ? `page ${index + 1} of ${sources.length}` : "text";
+            const result = await ocrSource(sources[index], pageLabel);
+            const text = result.data.text.trim();
+            pages.push(`Page ${index + 1}\n${text || "Image to text completed, but no readable text was found."}`);
+          }
+          textOutput.value = pages.join("\n\n");
+          fileStatus.textContent = "Image-to-text complete";
+          setProgress("Image-to-text complete. Run AI extraction next.", 100);
           return;
         } catch (error) {
-          textOutput.value = "OCR could not run in this browser session. Paste extracted text here or use the sample, then run AI extraction.";
-          fileStatus.textContent = "OCR fallback";
-          setProgress("OCR fallback ready", 100);
+          textOutput.value = "Image-to-text could not run in this browser session. Paste extracted text here or use the sample, then run AI extraction.";
+          fileStatus.textContent = "Image-to-text fallback";
+          setProgress("Image-to-text fallback ready", 100);
           return;
         }
       }
-      textOutput.value = "OCR libraries are still loading. Paste text here or use the sample, then run AI extraction.";
-      fileStatus.textContent = "OCR fallback";
-      setProgress("OCR fallback ready", 100);
+      textOutput.value = "Image-to-text libraries are still loading. Paste text here or use the sample, then run AI extraction.";
+      fileStatus.textContent = "Image-to-text fallback";
+      setProgress("Image-to-text fallback ready", 100);
     }
 
     function extractFields() {
@@ -629,8 +660,8 @@
       selectedImageUrl = "";
       fileName.textContent = "sample-scanned-resume.pdf";
       fileType.textContent = "Scanned PDF";
-      fileStatus.textContent = "Sample OCR complete";
-      preview.innerHTML = '<div class="preview-empty"><strong>Sample scanned PDF</strong><br>OCR text has been extracted below.</div>';
+      fileStatus.textContent = "Sample image-to-text complete";
+      preview.innerHTML = '<div class="preview-empty"><strong>Sample scanned PDF</strong><br>Image-to-text content has been extracted below.</div>';
       textOutput.value = `Name: Maria Santos
 Email: maria.santos@example.com
 Phone: +63 917 555 0134
@@ -640,15 +671,28 @@ Experience: 6 years in People Operations
 Skills: Payroll, HRIS, Onboarding, Benefits, Excel, Compliance, Training, Communication
 
 Maria has supported employee lifecycle operations, benefits administration, HR documentation, onboarding workflows, and payroll coordination for distributed teams.`;
-      setProgress("Sample OCR text loaded. Run AI extraction next.", 100);
+      setProgress("Sample image-to-text content loaded. Run AI extraction next.", 100);
     });
 
     document.querySelector("#ocrBtn").addEventListener("click", runOcr);
     document.querySelector("#aiBtn").addEventListener("click", extractFields);
     document.querySelector("#copyBtn").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(textOutput.value);
-      statusText.textContent = "Extracted text copied.";
+      try {
+        await navigator.clipboard.writeText(textOutput.value);
+        statusText.textContent = "Extracted text copied.";
+      } catch {
+        const fallback = document.createElement("textarea");
+        fallback.value = textOutput.value;
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.appendChild(fallback);
+        fallback.select();
+        const copied = document.execCommand && document.execCommand("copy");
+        fallback.remove();
+        statusText.textContent = copied ? "Extracted text copied." : "Copy failed in this browser. Select the text manually.";
+      }
     });
   </script>
+  <script src="../footer.js"></script>
 </body>
 </html>

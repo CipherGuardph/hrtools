@@ -187,11 +187,11 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/applicant-intake/">
+    <a class="brand" href="../index.html">
       <span class="mark">IN</span>
       <span>Analyzer Register</span>
     </a>
-    <a class="back" href="/applicant-intake/login/">Back to Login</a>
+    <a class="back" id="backToLoginLink" href="../login/index.html">Back to Login</a>
   </header>
 
   <main class="shell">
@@ -217,7 +217,11 @@
   <script src="../shared.js"></script>
   <script>
     const el = id => document.getElementById(id);
+    const isFileProtocol = window.location.protocol === "file:";
+    const routeFor = (serverPath, filePath) => (isFileProtocol ? new URL(filePath, window.location.href).toString() : serverPath);
+    const loginUrl = routeFor("/applicant-intake/login/", "../login/index.html");
     const nextUrl = new URLSearchParams(window.location.search).get("next") || "/applicant-intake/dashboard/";
+    el("backToLoginLink").href = `${loginUrl}?next=${encodeURIComponent(nextUrl)}`;
 
     async function createAccount() {
       try {
@@ -232,7 +236,7 @@
           el("password").value
         );
         el("statusBox").textContent = "Account created. Redirecting to login...";
-        window.location.href = `/applicant-intake/login/?next=${encodeURIComponent(nextUrl)}`;
+        window.location.href = `${loginUrl}?next=${encodeURIComponent(nextUrl)}`;
       } catch (error) {
         el("statusBox").textContent = `Registration failed: ${error.message}`;
       }
@@ -244,5 +248,6 @@
       ? "System connection loaded. You can create the account now."
       : "System connection is missing. Add it to the internal config before creating the account.";
   </script>
+  <script src="../../footer.js"></script>
 </body>
 </html>

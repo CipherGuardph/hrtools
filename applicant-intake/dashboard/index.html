@@ -378,11 +378,11 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/applicant-intake/">
+    <a class="brand" href="../index.html">
       <span class="mark">AI</span>
       <span>Instant Applicant Analyzer</span>
     </a>
-    <a class="back" href="/applicant-intake/">Back to entry</a>
+    <a class="back" href="../index.html">Back to entry</a>
   </header>
 
   <main class="shell">
@@ -393,7 +393,7 @@
         <p class="lead">Review candidates, check extracted resume data, update status, and use the public applicant QR link to receive new submissions.</p>
       </div>
       <div class="button-row">
-        <a class="btn primary" href="/applicant-intake/apply/?job=cashier">Open applicant link</a>
+        <a class="btn primary" id="openApplicantLink" href="../apply/index.html?job=cashier">Open applicant link</a>
         <button class="btn" id="signOutBtn" type="button">Sign out</button>
       </div>
     </section>
@@ -471,6 +471,7 @@
         <label>Status
           <select id="statusSelect">
             <option>queued</option>
+            <option>reviewing</option>
             <option>reviewed</option>
             <option>shortlisted</option>
             <option>interview</option>
@@ -495,10 +496,12 @@
     </section>
   </main>
 
-  <script src="../config.js"></script>
-  <script src="../shared.js"></script>
-  <script>
+    <script src="../shared.js"></script>
+    <script>
     const el = id => document.getElementById(id);
+    const isFileProtocol = window.location.protocol === "file:";
+    const routeFor = (serverPath, filePath) => (isFileProtocol ? new URL(filePath, window.location.href).toString() : serverPath);
+    const localSessionKey = "hrtools_applicant_intake_local_session";
     const demoStore = IntakeShared.getDemoDb();
     const state = {
       services: null,
@@ -511,8 +514,27 @@
       unsubJobs: null,
     };
 
+    function getLocalSession() {
+      try {
+        const raw = sessionStorage.getItem(localSessionKey);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function requireLocalSession() {
+      const session = getLocalSession();
+      if (!session || session.username !== "admin") {
+        window.location.href = routeFor("/applicant-intake/login/?next=/applicant-intake/dashboard/", "../login/index.html?next=" + encodeURIComponent(routeFor("/applicant-intake/dashboard/", "../dashboard/index.html")));
+        return false;
+      }
+      return true;
+    }
+
     function activeJobSlug() {
-      return state.jobs[0]?.slug || state.candidates[0]?.jobSlug || "cashier";
+      const candidate = currentCandidate();
+      return candidate?.jobSlug || state.jobs[0]?.slug || state.candidates[0]?.jobSlug || "cashier";
     }
 
     function applicantUrlFor(slug) {
@@ -602,7 +624,7 @@
       state.jobs = demo.jobs.slice();
       state.candidates = demo.candidates.slice();
       if (!state.selectedId) state.selectedId = state.candidates[0]?.id || null;
-      setStatus("Local preview loaded. Sign in to use the live backend.");
+      setStatus("Signed in as admin. Local preview loaded.");
       renderAll();
     }
 
@@ -671,46 +693,6 @@
       }
     }
 
-    function bindFirebase() {
-      const cfg = IntakeShared.getFirebaseConfig();
-      if (!cfg || !cfg.apiKey || !cfg.projectId || !cfg.appId) {
-        setStatus("Internal config is not available yet.");
-        return;
-      }
-      window.__FIREBASE_CONFIG__ = cfg;
-      IntakeShared.connectFirebase(cfg).then(services => {
-        state.services = services;
-        state.mode = "firebase";
-        services.auth.onAuthStateChanged(user => {
-          if (!user) {
-            window.location.href = `/applicant-intake/login/?next=${encodeURIComponent("/applicant-intake/dashboard/")}`;
-            return;
-          }
-          state.authReady = true;
-          setStatus("Live backend connected.");
-          if (state.unsubCandidates) state.unsubCandidates();
-          if (state.unsubJobs) state.unsubJobs();
-          state.unsubCandidates = services.db.collection("candidates").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-            state.candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            state.selectedId = state.candidates.some(item => item.id === state.selectedId)
-              ? state.selectedId
-              : (state.candidates[0]?.id || null);
-            renderAll();
-          });
-          state.unsubJobs = services.db.collection("jobs").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-            const liveJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (liveJobs.length) {
-              state.jobs = liveJobs;
-            }
-            renderAll();
-          });
-        });
-      }).catch(error => {
-        setStatus(`Live backend connection failed: ${error.message}`);
-        renderAll();
-      });
-    }
-
     el("rows").addEventListener("click", event => {
       const row = event.target.closest("tr[data-id]");
       if (!row) return;
@@ -756,13 +738,8 @@
     });
 
     el("signOutBtn").addEventListener("click", async () => {
-      try {
-        if (state.mode === "firebase" && state.services?.auth) {
-          await state.services.auth.signOut();
-        }
-      } finally {
-        window.location.href = "/applicant-intake/login/";
-      }
+      sessionStorage.removeItem(localSessionKey);
+      window.location.href = routeFor("/applicant-intake/login/?next=/applicant-intake/dashboard/", "../login/index.html?next=" + encodeURIComponent(routeFor("/applicant-intake/dashboard/", "../dashboard/index.html")));
     });
 
     el("downloadQrBtn").addEventListener("click", () => {
@@ -788,13 +765,12 @@
       win.onload = () => setTimeout(() => win.print(), 250);
     });
 
-    renderAll();
-    const savedConfig = IntakeShared.getFirebaseConfig();
-    if (savedConfig && savedConfig.apiKey && savedConfig.projectId && savedConfig.appId) {
-      bindFirebase();
-    } else {
+    el("openApplicantLink").href = routeFor("/applicant-intake/apply/?job=cashier", "../apply/index.html?job=cashier");
+
+    if (requireLocalSession()) {
       loadDemo();
     }
   </script>
+  <script src="../../footer.js"></script>
 </body>
 </html>

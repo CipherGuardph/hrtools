@@ -150,6 +150,12 @@
     if (configured) {
       return String(configured).replace(/\/$/, "");
     }
+    if (window.location.protocol === "file:") {
+      const match = window.location.href.match(/^(.*\/applicant-intake\/)/i);
+      if (match) {
+        return match[1].replace(/\/$/, "");
+      }
+    }
     return new URL("/applicant-intake/", window.location.origin).toString().replace(/\/$/, "");
   }
 

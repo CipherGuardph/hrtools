@@ -187,59 +187,91 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/applicant-intake/">
+    <a class="brand" href="../index.html">
       <span class="mark">IN</span>
       <span>Analyzer Login</span>
     </a>
-    <a class="back" href="/applicant-intake/">Back to Intake</a>
+    <a class="back" id="backToIntakeLink" href="../index.html">Back to Intake</a>
   </header>
 
   <main class="shell">
     <section class="panel">
       <span class="badge">Secure HR access</span>
       <h1>Login for Instant Applicant Analyzer</h1>
-      <p class="lead">Sign in with your HR email and password to open the recruiter dashboard and manage applicant intake.</p>
+      <p class="lead">Sign in with the local admin credentials to open the recruiter dashboard and manage applicant intake.</p>
 
       <div class="form-grid">
-        <label class="wide">Email<input id="email" type="email" placeholder="admin@example.com"></label>
-        <label class="wide">Password<input id="password" type="password" placeholder="Enter your password"></label>
+        <label class="wide">Username<input id="username" type="text" value="admin" placeholder="admin" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="wide">Password<input id="password" type="password" value="admin" placeholder="admin" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
       </div>
 
       <div class="button-row">
         <button class="btn primary" id="signInBtn" type="button">Sign In</button>
-          <a class="btn" href="/applicant-intake/register/?next=/applicant-intake/dashboard/">Create Account</a>
       </div>
 
-      <div class="notice" id="statusBox">Use your HR account to continue into the protected dashboard.</div>
+      <div class="notice" id="statusBox">Use username `admin` and password `admin` to continue into the dashboard.</div>
     </section>
   </main>
-
-  <script src="../config.js"></script>
-  <script src="../shared.js"></script>
   <script>
     const el = id => document.getElementById(id);
-    const nextUrl = new URLSearchParams(window.location.search).get("next") || "/applicant-intake/dashboard/";
+    const isFileProtocol = window.location.protocol === "file:";
+    const routeFor = (serverPath, filePath) => (isFileProtocol ? new URL(filePath, window.location.href).toString() : serverPath);
+    const appRoot = routeFor("/applicant-intake/", "../");
+    function resolveNextTarget(raw) {
+      const fallback = routeFor("/applicant-intake/dashboard/", "../dashboard/index.html");
+      const next = String(raw || "").trim();
+      if (!next) return fallback;
+      if (!isFileProtocol) return next;
+      if (next.startsWith("file:")) return next;
+      if (next.startsWith("/applicant-intake/")) {
+        return new URL(next.replace(/^\/applicant-intake\//, ""), appRoot).toString();
+      }
+      if (next.startsWith("./") || next.startsWith("../") || !next.includes("://")) {
+        const normalized = next.replace(/^(\.\.\/|\.\/)+/, "");
+        return new URL(normalized || "dashboard/index.html", appRoot).toString();
+      }
+      return next;
+    }
+    const nextUrl = resolveNextTarget(new URLSearchParams(window.location.search).get("next"));
+    el("backToIntakeLink").href = routeFor("/applicant-intake/", "../index.html");
+    const localSessionKey = "hrtools_applicant_intake_local_session";
 
-    async function signIn() {
+    function setSession() {
+      sessionStorage.setItem(localSessionKey, JSON.stringify({
+        username: "admin",
+        signedInAt: new Date().toISOString(),
+      }));
+    }
+
+    function isSignedIn() {
       try {
-        const config = IntakeShared.getFirebaseConfig();
-        if (!config || !config.apiKey || !config.projectId || !config.appId) {
-          throw new Error("Firebase config is missing from config.js.");
-        }
-        window.__FIREBASE_CONFIG__ = config;
-        const services = await IntakeShared.connectFirebase(config, { useDatabase: false });
-        await services.auth.signInWithEmailAndPassword(el("email").value.trim(), el("password").value);
-        window.location.href = nextUrl;
-      } catch (error) {
-        el("statusBox").textContent = `Sign in failed: ${error.message}`;
+        const raw = sessionStorage.getItem(localSessionKey);
+        const data = raw ? JSON.parse(raw) : null;
+        return data && data.username === "admin";
+      } catch {
+        return false;
       }
     }
 
+    function signIn() {
+      const username = el("username").value.trim().toLowerCase();
+      const password = el("password").value.trim();
+      if (username !== "admin" || password !== "admin") {
+        el("statusBox").textContent = "Sign in failed: use admin / admin.";
+        return;
+      }
+      setSession();
+      window.location.href = nextUrl;
+    }
+
+    ["username", "password"].forEach(id => {
+      el(id).addEventListener("focus", event => event.target.select());
+    });
     el("signInBtn").addEventListener("click", signIn);
-    const config = IntakeShared.getFirebaseConfig();
-    el("statusBox").textContent = config && config.apiKey
-      ? "System connection loaded. You can sign in now."
-      : "System connection is missing. Add it to the internal config before signing in.";
+    if (isSignedIn()) {
+      window.location.href = resolveNextTarget(nextUrl);
+    }
   </script>
+  <script src="../../footer.js"></script>
 </body>
 </html>
