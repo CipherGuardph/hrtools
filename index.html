@@ -134,6 +134,28 @@
       justify-self: center;
     }
 
+    .copy > * {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: hero-rise 700ms ease-out forwards;
+    }
+
+    .copy > *:nth-child(1) {
+      animation-delay: 80ms;
+    }
+
+    .copy > *:nth-child(2) {
+      animation-delay: 180ms;
+    }
+
+    .copy > *:nth-child(3) {
+      animation-delay: 280ms;
+    }
+
+    .copy > *:nth-child(4) {
+      animation-delay: 380ms;
+    }
+
     h1 {
       margin: 0;
       font-size: clamp(3rem, 7vw, 7.4rem);
@@ -260,6 +282,17 @@
       letter-spacing: 0.08em;
     }
 
+    @keyframes hero-rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 960px) {
       .hero {
         grid-template-columns: 1fr;
@@ -285,6 +318,21 @@
       }
 
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .brand,
+      .button,
+      .project-card,
+      .copy > * {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .copy > * {
+        opacity: 1;
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -308,7 +356,6 @@
           <a class="button" href="./email-to-hr/index.html">Email to HR</a>
           <a class="button" href="./hr-sms-broadcast/index.html">HR SMS Broadcast</a>
           <a class="button" href="https://bpo-interview.cipherguardph.com/" target="_blank" rel="noopener noreferrer">BPO interview simulator</a>
-          <span class="button disabled" aria-disabled="true">Instant Applicant Analyzer - Under Construction</span>
         </div>
 
         <section class="projects" aria-label="Other projects">

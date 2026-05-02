@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instant Applicant Analyzer - Under Construction</title>
+  <title>Instant Applicant Analyzer</title>
   <style>
     :root {
       --ink: #17211b;
@@ -68,6 +68,13 @@
       padding: 34px clamp(18px, 5vw, 64px) 56px;
     }
 
+    .gate {
+      min-height: calc(100vh - 84px);
+      display: grid;
+      place-items: center;
+      padding: 34px clamp(18px, 5vw, 64px) 56px;
+    }
+
     .panel {
       width: min(760px, 100%);
       background: var(--panel);
@@ -78,6 +85,33 @@
       display: grid;
       gap: 18px;
       text-align: center;
+    }
+
+    .login-fields {
+      display: grid;
+      gap: 12px;
+      width: min(420px, 100%);
+      justify-self: center;
+    }
+
+    .login-fields label {
+      display: grid;
+      gap: 8px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .login-fields input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      font: inherit;
     }
 
     .badge {
@@ -166,7 +200,7 @@
     }
   </style>
 </head>
-<body>
+  <body>
   <div class="shell">
     <header>
       <a class="brand" href="../index.html">
@@ -175,18 +209,73 @@
       </a>
     </header>
 
-    <main class="hero">
-      <section class="panel" aria-label="Under construction notice">
-        <span class="badge">Under construction</span>
+    <main class="gate" id="gate">
+      <section class="panel" aria-label="Login page">
+        <span class="badge">Login required</span>
         <h1>Instant Applicant Analyzer</h1>
-        <p class="lead">This tool is being rebuilt right now. The analyzer will return soon with a refreshed intake flow, but it is not available yet.</p>
-        <div class="actions">
-          <a class="button ghost" href="../index.html">Back Home</a>
+        <p class="lead">Enter the password to access the applicant intake area.</p>
+        <div class="login-fields">
+          <label for="gatePassword">Password
+            <input id="gatePassword" type="password" autocomplete="current-password" placeholder="Enter password">
+          </label>
         </div>
-        <p class="hint">Please check back later for the full applicant intake experience.</p>
+        <div class="actions">
+          <button class="button" type="button" id="loginBtn">Login</button>
+          <a class="button secondary" href="../index.html">Back Home</a>
+        </div>
+        <p class="hint" id="gateStatus">If you do not have the password, contact the site owner.</p>
+      </section>
+    </main>
+
+    <main class="hero" id="appArea" hidden>
+      <section class="panel" aria-label="Applicant analyzer entry">
+        <span class="badge">Ready</span>
+        <h1>Instant Applicant Analyzer</h1>
+        <p class="lead">Review applicant information, compare notes, and keep screening details in one simple place.</p>
+        <div class="actions">
+          <a class="button" href="../index.html">Back Home</a>
+          <a class="button secondary" href="../hr-sms-broadcast/index.html">Go to HR SMS Broadcast</a>
+        </div>
+        <p class="hint">Use this page as the launch point for applicant review and intake workflows.</p>
       </section>
     </main>
   </div>
   <script src="../footer.js"></script>
+  <script>
+    (function () {
+      const gate = document.getElementById("gate");
+      const appArea = document.getElementById("appArea");
+      const passwordInput = document.getElementById("gatePassword");
+      const loginBtn = document.getElementById("loginBtn");
+      const gateStatus = document.getElementById("gateStatus");
+      const storageKey = "applicant-intake-auth";
+      const gatePassword = window.APPLICANT_INTAKE_PASSWORD || "open-sesame";
+
+      function openApp() {
+        gate.hidden = true;
+        appArea.hidden = false;
+      }
+
+      function login() {
+        if (passwordInput.value === gatePassword) {
+          sessionStorage.setItem(storageKey, "ok");
+          openApp();
+          return;
+        }
+        gateStatus.textContent = "Incorrect password. Please try again.";
+      }
+
+      loginBtn.addEventListener("click", login);
+      passwordInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          login();
+        }
+      });
+
+      if (sessionStorage.getItem(storageKey) === "ok") {
+        openApp();
+      }
+    })();
+  </script>
 </body>
 </html>
