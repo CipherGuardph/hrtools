@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Website QR Generator</title>
+  <title>Job Posting Site QR Generator</title>
   <style>
     :root {
       --ink: #17211b;
@@ -299,15 +299,15 @@
   <header>
     <a class="brand" href="../index.html">
       <span class="mark">HR</span>
-      <span>Website QR Generator</span>
+      <span>Job Posting Site QR Generator</span>
     </a>
     <a class="back" href="../index.html">Back Home</a>
   </header>
 
   <section class="hero">
     <div>
-      <h1>Website QR Generator</h1>
-      <p class="lead">Enter a website URL, generate a QR code, and print it so applicants can scan it and open your site directly.</p>
+      <h1>Job Posting Site QR Generator</h1>
+      <p class="lead">Enter a website URL, generate a QR code, and print it so applicants can scan it and open your job posting site directly.</p>
     </div>
         <span class="pill">/email-to-hr</span>
   </section>
@@ -318,7 +318,7 @@
         <h2>QR Settings</h2>
       </div>
 
-      <label>Website URL
+      <label>Job Posting Site URL
         <input id="emailInput" type="url" placeholder="https://yourwebsite.com" value="https://cipherguardph.com/">
         <span style="color: var(--muted); font-size: 0.82rem; font-weight: 700;">The QR code will open <code id="mailtoPreview">https://cipherguardph.com/</code>.</span>
       </label>
@@ -340,7 +340,6 @@
   </main>
 
   <script src="../footer.js"></script>
-  <script src="./qr.js"></script>
   <script>
     (function () {
       const emailInput = document.getElementById("emailInput");
@@ -371,17 +370,13 @@
         refreshMailtoPreview(url);
 
         if (!url) {
-          qrBox.innerHTML = "<div style='color: var(--muted); font-weight: 800; text-align: center; line-height: 1.5;'>Enter a valid website URL to generate the QR code.</div>";
-          statusText.textContent = "Waiting for a valid website URL.";
+          qrBox.innerHTML = "<div style='color: var(--muted); font-weight: 800; text-align: center; line-height: 1.5;'>Enter a valid job posting site URL to generate the QR code.</div>";
+          statusText.textContent = "Waiting for a valid job posting site URL.";
           return;
         }
 
-        qrBox.innerHTML = window.HrMailQr.buildQrSvg(url, {
-          moduleSize: 12,
-          quietZone: 4,
-          dark: "#17211b",
-          light: "#ffffff",
-        });
+        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&margin=12&data=${encodeURIComponent(url)}`;
+        qrBox.innerHTML = `<img src="${qrSrc}" alt="QR code for ${url}" style="width: min(100%, 420px); height: auto; display: block; margin: 0 auto;">`;
         statusText.textContent = `QR code generated for ${url}. You can print this page now.`;
       }
 
